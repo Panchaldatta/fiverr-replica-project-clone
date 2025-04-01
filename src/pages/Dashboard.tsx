@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShoppingBag, MessageSquare, Star, Settings, DollarSign } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const Dashboard = () => {
   const { user, isLoading } = useAuth();
