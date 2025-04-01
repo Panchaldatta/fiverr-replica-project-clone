@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -79,6 +73,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -97,5 +92,24 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .fiverr-button {
+    @apply bg-fiverr-green text-white font-semibold py-2 px-4 rounded hover:bg-fiverr-dark-green transition-colors duration-200;
+  }
+  
+  .fiverr-button-outline {
+    @apply border border-fiverr-green text-fiverr-green font-semibold py-2 px-4 rounded hover:bg-fiverr-green hover:text-white transition-colors duration-200;
+  }
+  
+  .gig-card {
+    @apply bg-white rounded-md overflow-hidden border border-fiverr-border-gray hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .nav-link {
+    @apply text-fiverr-black hover:text-fiverr-green transition-colors duration-150 cursor-pointer;
   }
 }
