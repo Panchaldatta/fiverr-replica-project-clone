@@ -1,11 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, X, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, ChevronDown, Bell, MessageSquare, Heart, ShoppingCart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 const categories = [
   "Graphics & Design",
@@ -23,7 +32,10 @@ const Header = () => {
   const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with actual auth state
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +49,18 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const getInitials = () => {
+    if (user?.displayName) {
+      return user.displayName.split(' ').map(name => name[0]).join('').toUpperCase();
+    }
+    return 'U';
+  };
 
   return (
     <header className={cn(
@@ -106,17 +130,48 @@ const Header = () => {
                 )}
                 {isLoggedIn && (
                   <>
-                    <Link to="/messages" className="nav-link hidden lg:block">
-                      Messages
+                    <Link to="/messages" className="nav-link hidden lg:flex items-center">
+                      <MessageSquare size={20} />
                     </Link>
-                    <Link to="/orders" className="nav-link hidden lg:block">
-                      Orders
+                    <Link to="/orders" className="nav-link hidden lg:flex items-center">
+                      <ShoppingCart size={20} />
                     </Link>
-                    <div className="cursor-pointer">
-                      <div className="h-8 w-8 bg-fiverr-green rounded-full text-white flex items-center justify-center">
-                        U
-                      </div>
-                    </div>
+                    <Link to="/favorites" className="nav-link hidden lg:flex items-center">
+                      <Heart size={20} />
+                    </Link>
+                    <Link to="/notifications" className="nav-link hidden lg:flex items-center">
+                      <Bell size={20} />
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="focus:outline-none">
+                        <Avatar className="h-8 w-8 cursor-pointer">
+                          <AvatarImage src={user?.photoURL || undefined} />
+                          <AvatarFallback className="bg-fiverr-green text-white">
+                            {getInitials()}
+                          </AvatarFallback>
+                        </Avatar>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end">
+                        <div className="p-2">
+                          <p className="font-medium">{user?.displayName}</p>
+                          <p className="text-xs text-gray-500">{user?.email}</p>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                          Dashboard
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => navigate(`/profile/${user?.displayName?.toLowerCase().replace(/\s+/g, '-')}`)}>
+                          Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => navigate('/settings')}>
+                          Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={handleSignOut}>
+                          Sign Out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
               </>
@@ -140,9 +195,24 @@ const Header = () => {
 
             {/* Mobile profile icon */}
             {isMobile && isLoggedIn && (
-              <div className="h-8 w-8 bg-fiverr-green rounded-full text-white flex items-center justify-center">
-                U
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="focus:outline-none">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.photoURL || undefined} />
+                    <AvatarFallback className="bg-fiverr-green text-white">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={handleSignOut}>
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -179,12 +249,19 @@ const Header = () => {
                 </>
               ) : (
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="h-10 w-10 bg-fiverr-green rounded-full text-white flex items-center justify-center text-lg">
-                    U
-                  </div>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user?.photoURL || undefined} />
+                    <AvatarFallback className="bg-fiverr-green text-white">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="font-medium">Username</p>
-                    <p className="text-sm text-fiverr-gray">View Profile</p>
+                    <p className="font-medium">{user?.displayName}</p>
+                    <p className="text-sm text-fiverr-gray">
+                      <Link to={`/profile/${user?.displayName?.toLowerCase().replace(/\s+/g, '-')}`}>
+                        View Profile
+                      </Link>
+                    </p>
                   </div>
                 </div>
               )}
@@ -215,6 +292,9 @@ const Header = () => {
                     <>
                       <li><Link to="/orders" className="text-fiverr-black">Orders</Link></li>
                       <li><Link to="/messages" className="text-fiverr-black">Messages</Link></li>
+                      <li><Link to="/favorites" className="text-fiverr-black">Favorites</Link></li>
+                      <li><Link to="/dashboard" className="text-fiverr-black">Dashboard</Link></li>
+                      <li><button onClick={handleSignOut} className="text-fiverr-black">Sign Out</button></li>
                     </>
                   )}
                 </ul>
