@@ -5,12 +5,12 @@ import { toast } from '@/hooks/use-toast';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDgDZ-leKmFy2fxRSD3xvjAzpLTintk8kI",
-  authDomain: "fiverr-clone-lovable.firebaseapp.com",
-  projectId: "fiverr-clone-lovable",
-  storageBucket: "fiverr-clone-lovable.appspot.com",
-  messagingSenderId: "667364694733",
-  appId: "1:667364694733:web:d9054015d2a4b14fc9669e"
+  apiKey: "AIzaSyAUq9LK5vLdArwON1G6h1-ApcRwXt2g72o",
+  authDomain: "lovable-fiverr-clone.firebaseapp.com",
+  projectId: "lovable-fiverr-clone",
+  storageBucket: "lovable-fiverr-clone.appspot.com",
+  messagingSenderId: "882350598440",
+  appId: "1:882350598440:web:8a3db726ecc0b2fa7fccf1"
 };
 
 // Initialize Firebase
