@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -19,7 +18,7 @@ const sampleConversations: Conversation[] = [
     participantId: 'user-123',
     participantName: 'Jane Smith',
     participantAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-    lastMessage: 'I've reviewed your requirements and I can definitely help with your WordPress project.',
+    lastMessage: "I've reviewed your requirements and I can definitely help with your WordPress project.",
     timestamp: '2 hours ago',
     unread: 1
   },
@@ -28,7 +27,7 @@ const sampleConversations: Conversation[] = [
     participantId: 'user-456',
     participantName: 'Mark Johnson',
     participantAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    lastMessage: 'Thanks for your order! I'll start working on it right away.',
+    lastMessage: "Thanks for your order! I'll start working on it right away.",
     timestamp: 'Yesterday',
     unread: 0
   },
@@ -47,7 +46,7 @@ const sampleMessages: Record<string, Message[]> = {
   'conv-1': [
     {
       id: 'msg-1',
-      content: 'Hello! I saw your profile and I'm interested in your WordPress development services.',
+      content: "Hello! I saw your profile and I'm interested in your WordPress development services.",
       senderId: 'current-user',
       receiverId: 'user-123',
       senderName: 'You',
@@ -56,7 +55,7 @@ const sampleMessages: Record<string, Message[]> = {
     },
     {
       id: 'msg-2',
-      content: 'Hi there! Thanks for reaching out. I'd be happy to help with your WordPress needs. Could you tell me more about your project?',
+      content: "Hi there! Thanks for reaching out. I'd be happy to help with your WordPress needs. Could you tell me more about your project?",
       senderId: 'user-123',
       receiverId: 'current-user',
       senderName: 'Jane Smith',
@@ -75,7 +74,7 @@ const sampleMessages: Record<string, Message[]> = {
     },
     {
       id: 'msg-4',
-      content: 'I've reviewed your requirements and I can definitely help with your WordPress project. Would you like to proceed with my standard package?',
+      content: "I've reviewed your requirements and I can definitely help with your WordPress project. Would you like to proceed with my standard package?",
       senderId: 'user-123',
       receiverId: 'current-user',
       senderName: 'Jane Smith',
@@ -96,7 +95,7 @@ const sampleMessages: Record<string, Message[]> = {
     },
     {
       id: 'msg-6',
-      content: 'Thanks for your order! I'll start working on it right away. I'll send you the first drafts within 48 hours.',
+      content: "Thanks for your order! I'll start working on it right away. I'll send you the first drafts within 48 hours.",
       senderId: 'user-456',
       receiverId: 'current-user',
       senderName: 'Mark Johnson',
@@ -108,7 +107,7 @@ const sampleMessages: Record<string, Message[]> = {
   'conv-3': [
     {
       id: 'msg-7',
-      content: 'Hello Sarah, I'm checking on the progress of my banner design.',
+      content: "Hello Sarah, I'm checking on the progress of my banner design.",
       senderId: 'current-user',
       receiverId: 'user-789',
       senderName: 'You',
@@ -117,7 +116,7 @@ const sampleMessages: Record<string, Message[]> = {
     },
     {
       id: 'msg-8',
-      content: 'Hi! I'm finalizing the designs now and will deliver them shortly.',
+      content: "Hi! I'm finalizing the designs now and will deliver them shortly.",
       senderId: 'user-789',
       receiverId: 'current-user',
       senderName: 'Sarah Williams',

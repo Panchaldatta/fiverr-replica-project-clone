@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -75,7 +74,7 @@ const SellerProfile = () => {
         country: 'Australia'
       },
       rating: 5,
-      comment: 'One of the best developers I've worked with! Really understood my requirements and delivered exactly what I needed. Highly recommended.',
+      comment: "One of the best developers I've worked with! Really understood my requirements and delivered exactly what I needed. Highly recommended.",
       date: '1 month ago',
       helpful: 12
     }
