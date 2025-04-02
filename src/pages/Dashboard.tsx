@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Circle, DollarSign, PieChart, ShoppingCart, Star, MessageCircle, X } from 'lucide-react';
@@ -14,12 +13,25 @@ import { Conversation, Review, MessageChatProps } from '@/types/dashboard';
 const Dashboard = () => {
   const { user, isLoading } = useAuth();
   const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [userGigs, setUserGigs] = useState<GigData[]>([]);
   
   // Load user gigs from localStorage
   const getUserGigs = (): GigData[] => {
     const gigsJson = localStorage.getItem('userGigs');
     const allGigs = gigsJson ? JSON.parse(gigsJson) : [];
     return allGigs.filter((gig: GigData) => gig.sellerName === user?.displayName);
+  };
+
+  // Load gigs when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      setUserGigs(getUserGigs());
+    }
+  }, [user]);
+
+  // Handler for when a gig is deleted
+  const handleGigDeleted = () => {
+    setUserGigs(getUserGigs());
   };
 
   // Mock data
@@ -274,9 +286,13 @@ const Dashboard = () => {
         </TabsList>
         
         <TabsContent value="gigs" className="mt-0">
-          <UserGigsList />
+          <UserGigsList 
+            gigs={userGigs} 
+            onGigDeleted={handleGigDeleted} 
+          />
         </TabsContent>
         
+        {/* Other TabsContent components */}
         <TabsContent value="orders" className="mt-0">
           <Card>
             <CardHeader className="pb-3">
