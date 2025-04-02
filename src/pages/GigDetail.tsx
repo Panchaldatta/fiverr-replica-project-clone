@@ -1,9 +1,12 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star, ThumbsUp, Clock, ChevronDown, ChevronUp, CheckCircle, XCircle, MessageSquare, Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
+import ReviewList, { Review } from '@/components/reviews/ReviewList';
+import ReviewForm from '@/components/reviews/ReviewForm';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 // Sample gig data
 const gigData = {
@@ -102,9 +105,114 @@ const gigData = {
 
 const GigDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState(1); // Standard package selected by default
   const [showMore, setShowMore] = useState(false);
+  const [activeReviewsTab, setActiveReviewsTab] = useState('most-relevant');
+
+  // Sample reviews
+  const [reviews, setReviews] = useState<Review[]>([
+    {
+      id: 'review-1',
+      user: {
+        id: 'user-123',
+        name: 'Mark S.',
+        avatar: 'https://randomuser.me/api/portraits/men/43.jpg',
+        country: 'United States'
+      },
+      rating: 5,
+      comment: 'Amazing work! John delivered the website way before the deadline and it looks fantastic. Very responsive and professional. Will definitely use his services again.',
+      date: '2 weeks ago',
+      helpful: 8
+    },
+    {
+      id: 'review-2',
+      user: {
+        id: 'user-456',
+        name: 'Sophie T.',
+        avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+        country: 'Australia'
+      },
+      rating: 4,
+      comment: 'Great experience working with John. He understood my requirements perfectly and delivered a beautiful website. Minor revisions were handled quickly. Would recommend!',
+      date: '1 month ago',
+      helpful: 5
+    },
+    {
+      id: 'review-3',
+      user: {
+        id: 'user-789',
+        name: 'Ahmad K.',
+        avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+        country: 'United Arab Emirates'
+      },
+      rating: 5,
+      comment: 'Exceptional service! The website exceeded my expectations. Very professional and attentive to details. I highly recommend this seller for any WordPress development needs.',
+      date: '2 months ago',
+      helpful: 10
+    }
+  ]);
+
+  // Handle the addition of new review
+  const handleReviewSubmit = (review: { rating: number; comment: string }) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to submit a review",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const newReview: Review = {
+      id: `review-${Date.now()}`,
+      user: {
+        id: user?.uid || 'unknown',
+        name: user?.displayName || 'Anonymous',
+        avatar: user?.photoURL || 'https://via.placeholder.com/150',
+        country: 'Unknown Location'
+      },
+      rating: review.rating,
+      comment: review.comment,
+      date: 'Just now',
+      helpful: 0
+    };
+
+    setReviews(prev => [newReview, ...prev]);
+    
+    toast({
+      title: "Review submitted",
+      description: "Your review has been added successfully!",
+    });
+  };
+
+  // Handle adding a message to the seller
+  const handleContactSeller = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to message the seller",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Message initiated",
+      description: "You can now chat with the seller in your messages tab",
+    });
+  };
+
+  // Calculate average rating
+  const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
+  
+  // Count ratings by star level
+  const ratingCounts = reviews.reduce((acc, review) => {
+    acc[Math.floor(review.rating)] = (acc[Math.floor(review.rating)] || 0) + 1;
+    return acc;
+  }, {} as Record<number, number>);
 
   return (
     <div className="pt-8 pb-16">
@@ -314,14 +422,14 @@ const GigDetail = () => {
                 <div className="mb-8">
                   <div className="flex items-center mb-6">
                     <div className="mr-6">
-                      <span className="text-4xl font-bold text-fiverr-black">{gigData.seller.rating}</span>
+                      <span className="text-4xl font-bold text-fiverr-black">{averageRating.toFixed(1)}</span>
                       <div className="flex items-center mt-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             size={16}
                             className={`${
-                              i < Math.floor(gigData.seller.rating)
+                              i < Math.floor(averageRating)
                                 ? 'text-yellow-400 fill-yellow-400'
                                 : 'text-gray-300 fill-gray-300'
                             }`}
@@ -336,23 +444,23 @@ const GigDetail = () => {
                           <div className="flex items-center">
                             <span className="text-sm text-fiverr-gray mr-2">5 Stars</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '85%' }}></div>
+                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: `${((ratingCounts[5] || 0) / reviews.length) * 100}%` }}></div>
                             </div>
-                            <span className="text-sm text-fiverr-gray ml-2">(180)</span>
+                            <span className="text-sm text-fiverr-gray ml-2">({ratingCounts[5] || 0})</span>
                           </div>
                           <div className="flex items-center mt-2">
                             <span className="text-sm text-fiverr-gray mr-2">4 Stars</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '12%' }}></div>
+                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: `${((ratingCounts[4] || 0) / reviews.length) * 100}%` }}></div>
                             </div>
-                            <span className="text-sm text-fiverr-gray ml-2">(32)</span>
+                            <span className="text-sm text-fiverr-gray ml-2">({ratingCounts[4] || 0})</span>
                           </div>
                           <div className="flex items-center mt-2">
                             <span className="text-sm text-fiverr-gray mr-2">3 Stars</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '3%' }}></div>
+                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: `${((ratingCounts[3] || 0) / reviews.length) * 100}%` }}></div>
                             </div>
-                            <span className="text-sm text-fiverr-gray ml-2">(15)</span>
+                            <span className="text-sm text-fiverr-gray ml-2">({ratingCounts[3] || 0})</span>
                           </div>
                         </div>
                         
@@ -360,16 +468,16 @@ const GigDetail = () => {
                           <div className="flex items-center">
                             <span className="text-sm text-fiverr-gray mr-2">2 Stars</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '0%' }}></div>
+                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: `${((ratingCounts[2] || 0) / reviews.length) * 100}%` }}></div>
                             </div>
-                            <span className="text-sm text-fiverr-gray ml-2">(3)</span>
+                            <span className="text-sm text-fiverr-gray ml-2">({ratingCounts[2] || 0})</span>
                           </div>
                           <div className="flex items-center mt-2">
                             <span className="text-sm text-fiverr-gray mr-2">1 Star</span>
                             <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '0%' }}></div>
+                              <div className="h-2 bg-fiverr-green rounded-full" style={{ width: `${((ratingCounts[1] || 0) / reviews.length) * 100}%` }}></div>
                             </div>
-                            <span className="text-sm text-fiverr-gray ml-2">(1)</span>
+                            <span className="text-sm text-fiverr-gray ml-2">({ratingCounts[1] || 0})</span>
                           </div>
                         </div>
                       </div>
@@ -377,62 +485,35 @@ const GigDetail = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" className="text-sm border-fiverr-gray text-fiverr-black hover:bg-fiverr-light-gray">
+                    <Button 
+                      variant="outline" 
+                      className={`text-sm border-fiverr-gray text-fiverr-black ${activeReviewsTab === 'most-relevant' ? 'bg-fiverr-light-gray' : 'hover:bg-fiverr-light-gray'}`}
+                      onClick={() => setActiveReviewsTab('most-relevant')}
+                    >
                       Most Relevant
                     </Button>
-                    <Button variant="outline" className="text-sm border-fiverr-gray text-fiverr-black hover:bg-fiverr-light-gray">
+                    <Button 
+                      variant="outline" 
+                      className={`text-sm border-fiverr-gray text-fiverr-black ${activeReviewsTab === 'most-recent' ? 'bg-fiverr-light-gray' : 'hover:bg-fiverr-light-gray'}`}
+                      onClick={() => setActiveReviewsTab('most-recent')}
+                    >
                       Most Recent
                     </Button>
                   </div>
                 </div>
                 
                 {/* Reviews list */}
-                <div className="space-y-8">
-                  {gigData.reviews.map((review, index) => (
-                    <div key={index} className="pb-8 border-b border-fiverr-border-gray">
-                      <div className="flex items-center mb-4">
-                        <img 
-                          src={review.avatar} 
-                          alt={review.user} 
-                          className="w-12 h-12 rounded-full mr-3"
-                        />
-                        <div>
-                          <div className="flex items-center">
-                            <span className="text-fiverr-black font-medium mr-2">{review.user}</span>
-                            <span className="text-fiverr-gray text-sm">{review.country}</span>
-                          </div>
-                          <div className="flex items-center mt-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                size={14}
-                                className={`${
-                                  i < Math.floor(review.rating)
-                                    ? 'text-yellow-400 fill-yellow-400'
-                                    : 'text-gray-300 fill-gray-300'
-                                }`}
-                              />
-                            ))}
-                            <span className="text-fiverr-gray text-sm ml-2">| {review.date}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <p className="text-fiverr-black mb-4">{review.comment}</p>
-                      
-                      <div className="flex items-center">
-                        <span className="text-fiverr-gray text-sm mr-4">Helpful?</span>
-                        <button className="flex items-center text-fiverr-gray hover:text-fiverr-green mr-4">
-                          <ThumbsUp size={16} className="mr-1" />
-                          <span>Yes</span>
-                        </button>
-                        <button className="flex items-center text-fiverr-gray hover:text-fiverr-green">
-                          <MessageSquare size={16} className="mr-1" />
-                          <span>Comment</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                <ReviewList reviews={activeReviewsTab === 'most-recent' ? [...reviews].sort((a, b) => {
+                  return new Date(b.date).getTime() - new Date(a.date).getTime();
+                }) : reviews} />
+                
+                {/* Add Review Form */}
+                <div className="mt-10 pt-6 border-t border-fiverr-border-gray">
+                  <h3 className="text-xl font-bold mb-4">Leave a Review</h3>
+                  <ReviewForm 
+                    gigId={id} 
+                    onReviewSubmit={handleReviewSubmit}
+                  />
                 </div>
               </TabsContent>
               
@@ -517,7 +598,10 @@ const GigDetail = () => {
                     Continue (${gigData.packages[selectedPackage].price})
                   </Button>
                   
-                  <button className="w-full flex items-center justify-center mt-3 py-2 text-fiverr-dark-gray hover:text-fiverr-black">
+                  <button 
+                    className="w-full flex items-center justify-center mt-3 py-2 text-fiverr-dark-gray hover:text-fiverr-black"
+                    onClick={handleContactSeller}
+                  >
                     <MessageSquare size={16} className="mr-2" />
                     Contact Seller
                   </button>

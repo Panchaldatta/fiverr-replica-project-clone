@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,10 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { MapPin, Star, Clock, Check, MessageSquare } from 'lucide-react';
+import ReviewList, { Review } from '@/components/reviews/ReviewList';
+import ReviewForm from '@/components/reviews/ReviewForm';
 
 const SellerProfile = () => {
   const { username } = useParams();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('gigs');
   
   // This would normally fetch the seller data from a backend
   // For demo purposes, we're using the current user's data
@@ -32,6 +36,69 @@ const SellerProfile = () => {
       completedOrders: 312,
       inProgress: 3
     }
+  };
+
+  // Sample reviews for this seller
+  const sellerReviews: Review[] = [
+    {
+      id: 'review-1',
+      user: {
+        id: 'user-123',
+        name: 'Jessica Lee',
+        avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
+        country: 'United States'
+      },
+      rating: 5,
+      comment: 'Incredible work! The delivery was faster than expected and the quality exceeded my expectations. Will definitely work with this seller again.',
+      date: '1 week ago',
+      helpful: 7
+    },
+    {
+      id: 'review-2',
+      user: {
+        id: 'user-456',
+        name: 'Michael Rodriguez',
+        avatar: 'https://randomuser.me/api/portraits/men/54.jpg',
+        country: 'Spain'
+      },
+      rating: 4,
+      comment: 'Great service overall. Communication was smooth and the final product was good. Just needed a few minor revisions.',
+      date: '2 weeks ago',
+      helpful: 3
+    },
+    {
+      id: 'review-3',
+      user: {
+        id: 'user-789',
+        name: 'Amanda Wilson',
+        avatar: 'https://randomuser.me/api/portraits/women/22.jpg',
+        country: 'Australia'
+      },
+      rating: 5,
+      comment: 'One of the best developers I've worked with! Really understood my requirements and delivered exactly what I needed. Highly recommended.',
+      date: '1 month ago',
+      helpful: 12
+    }
+  ];
+
+  const [reviews, setReviews] = useState<Review[]>(sellerReviews);
+
+  const handleReviewSubmit = (review: { rating: number; comment: string }) => {
+    const newReview: Review = {
+      id: `review-${Date.now()}`,
+      user: {
+        id: user?.uid || 'unknown',
+        name: user?.displayName || 'Anonymous',
+        avatar: user?.photoURL || 'https://via.placeholder.com/150',
+        country: 'Unknown Location'
+      },
+      rating: review.rating,
+      comment: review.comment,
+      date: 'Just now',
+      helpful: 0
+    };
+
+    setReviews(prev => [newReview, ...prev]);
   };
 
   return (
@@ -143,7 +210,7 @@ const SellerProfile = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="gigs">
+          <Tabs defaultValue="gigs" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="gigs">Gigs</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
@@ -161,12 +228,76 @@ const SellerProfile = () => {
             </TabsContent>
             
             <TabsContent value="reviews">
-              <div className="flex flex-col items-center justify-center py-12 text-center bg-white border border-fiverr-border-gray rounded-md">
-                <div className="text-6xl mb-4">⭐</div>
-                <h3 className="text-xl font-medium text-fiverr-black">No reviews yet</h3>
-                <p className="text-fiverr-gray mt-2 max-w-md">
-                  Once this seller completes orders, reviews will appear here.
-                </p>
+              <div className="bg-white border border-fiverr-border-gray rounded-md p-6">
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-fiverr-black">
+                      {reviews.length} Reviews
+                    </h2>
+                    <div className="flex items-center">
+                      <Star size={16} className="text-yellow-400 fill-yellow-400 mr-1" />
+                      <span className="font-medium">{seller.stats.rating}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Rating summary */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <div className="flex items-center">
+                        <span className="text-sm text-fiverr-gray mr-2">5 Stars</span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '85%' }}></div>
+                        </div>
+                        <span className="text-sm text-fiverr-gray ml-2">(180)</span>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <span className="text-sm text-fiverr-gray mr-2">4 Stars</span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '12%' }}></div>
+                        </div>
+                        <span className="text-sm text-fiverr-gray ml-2">(32)</span>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <span className="text-sm text-fiverr-gray mr-2">3 Stars</span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '3%' }}></div>
+                        </div>
+                        <span className="text-sm text-fiverr-gray ml-2">(15)</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center">
+                        <span className="text-sm text-fiverr-gray mr-2">2 Stars</span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '0%' }}></div>
+                        </div>
+                        <span className="text-sm text-fiverr-gray ml-2">(3)</span>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <span className="text-sm text-fiverr-gray mr-2">1 Star</span>
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-fiverr-green rounded-full" style={{ width: '0%' }}></div>
+                        </div>
+                        <span className="text-sm text-fiverr-gray ml-2">(1)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Reviews list */}
+                <ReviewList reviews={reviews} />
+                
+                {/* Review form */}
+                <div className="mt-8 pt-8 border-t border-fiverr-border-gray">
+                  <h3 className="text-xl font-bold text-fiverr-black mb-4">
+                    Leave a Review for {seller.displayName}
+                  </h3>
+                  <ReviewForm 
+                    sellerId={seller.username} 
+                    onReviewSubmit={handleReviewSubmit} 
+                  />
+                </div>
               </div>
             </TabsContent>
             
