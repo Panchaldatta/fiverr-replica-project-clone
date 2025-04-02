@@ -86,7 +86,36 @@ const sampleMessages: Record<string, Message[]> = {
   'conv-2': [
     {
       id: 'msg-5',
-      content: 'Hi Mark, I just placed an order for your logo design service.',
+      content: "I'd like to order your Basic WordPress website package.",
+      senderId: 'current-user',
+      receiverId: 'user-456',
+      senderName: 'You',
+      timestamp: '3 days ago',
+      read: true
+    },
+    {
+      id: 'msg-6',
+      content: "Great choice! I'll create a custom order for you right away.",
+      senderId: 'user-456',
+      receiverId: 'current-user',
+      senderName: 'Mark Johnson',
+      senderAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '3 days ago',
+      read: true
+    },
+    {
+      id: 'msg-7',
+      content: "I've sent you a custom offer. Please check and accept it when you're ready.",
+      senderId: 'user-456',
+      receiverId: 'current-user',
+      senderName: 'Mark Johnson',
+      senderAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '2 days ago',
+      read: true
+    },
+    {
+      id: 'msg-8',
+      content: "I've accepted the offer and made the payment.",
       senderId: 'current-user',
       receiverId: 'user-456',
       senderName: 'You',
@@ -94,8 +123,8 @@ const sampleMessages: Record<string, Message[]> = {
       read: true
     },
     {
-      id: 'msg-6',
-      content: "Thanks for your order! I'll start working on it right away. I'll send you the first drafts within 48 hours.",
+      id: 'msg-9',
+      content: "Thanks for your order! I'll start working on it right away.",
       senderId: 'user-456',
       receiverId: 'current-user',
       senderName: 'Mark Johnson',
@@ -106,8 +135,8 @@ const sampleMessages: Record<string, Message[]> = {
   ],
   'conv-3': [
     {
-      id: 'msg-7',
-      content: "Hello Sarah, I'm checking on the progress of my banner design.",
+      id: 'msg-10',
+      content: "How's my logo design coming along?",
       senderId: 'current-user',
       receiverId: 'user-789',
       senderName: 'You',
@@ -115,18 +144,18 @@ const sampleMessages: Record<string, Message[]> = {
       read: true
     },
     {
-      id: 'msg-8',
-      content: "Hi! I'm finalizing the designs now and will deliver them shortly.",
+      id: 'msg-11',
+      content: "It's going well! I've completed the initial concepts and will send them to you shortly.",
       senderId: 'user-789',
       receiverId: 'current-user',
       senderName: 'Sarah Williams',
       senderAvatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-      timestamp: '3 days ago',
+      timestamp: '4 days ago',
       read: true
     },
     {
-      id: 'msg-9',
-      content: 'The final files have been delivered. Please let me know if you need any revisions.',
+      id: 'msg-12',
+      content: "I've just delivered the final files. Please check them out and let me know if you need any revisions.",
       senderId: 'user-789',
       receiverId: 'current-user',
       senderName: 'Sarah Williams',
@@ -254,162 +283,431 @@ const Dashboard = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="orders" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Orders</CardTitle>
-              <CardDescription>Manage your active orders here.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <ShoppingBag size={64} className="text-gray-300 mb-4" />
-                <h3 className="text-xl font-medium text-fiverr-black">No active orders</h3>
-                <p className="text-fiverr-gray mt-2 max-w-md">
-                  You don't have any active orders at the moment. Browse services to find what you need.
-                </p>
-                <Button variant="outline" className="mt-6 fiverr-button-outline">
-                  Browse Services
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="orders">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Orders</CardTitle>
+                <CardDescription>Orders currently in progress</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">3</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Completed Orders</CardTitle>
+                <CardDescription>Successfully delivered orders</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">27</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Cancelled Orders</CardTitle>
+                <CardDescription>Orders that were cancelled</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">2</div>
+              </CardContent>
+            </Card>
+          </div>
           
-          {/* Reviews section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Reviews & Ratings</CardTitle>
-              <CardDescription>Manage your reviews or leave new ones for completed services.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Reviews list */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Your Reviews</h3>
-                <ReviewList reviews={reviews} />
+          <div className="mt-8">
+            <h2 className="text-xl font-bold mb-4">Recent Orders</h2>
+            <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-fiverr-light-gray">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Order</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Buyer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Service</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Due On</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-fiverr-border-gray">
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3251</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Mark Johnson</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">WordPress Website</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 15, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$120</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          In Progress
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3250</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Sarah Williams</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Logo Design</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 10, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$50</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          Delivered
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3249</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Alex Chen</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">SEO Optimization</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 5, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$75</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          Completed
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              
-              {/* Review form */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">Leave a New Review</h3>
-                <ReviewForm onReviewSubmit={handleReviewSubmit} />
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
         
-        <TabsContent value="messages" className="space-y-6">
-          <Card className="overflow-hidden">
-            <CardHeader>
-              <CardTitle>Messages</CardTitle>
-              <CardDescription>View and manage your conversations.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 h-[600px]">
-                {/* Conversations list */}
-                <div className="border-r border-fiverr-border-gray overflow-y-auto">
+        <TabsContent value="messages">
+          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray">
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              {/* Messages sidebar */}
+              <div className="border-r border-fiverr-border-gray">
+                <div className="p-4 border-b border-fiverr-border-gray">
+                  <Input 
+                    placeholder="Search messages..." 
+                    className="w-full"
+                  />
+                </div>
+                <div className="h-[600px] overflow-y-auto">
                   <MessageList 
-                    conversations={sampleConversations} 
+                    conversations={sampleConversations}
+                    activeConversationId={activeConversation}
                     onSelectConversation={(id) => setActiveConversation(id)}
-                    activeConversationId={activeConversation || undefined}
                   />
-                </div>
-                
-                {/* Chat window */}
-                <div className="md:col-span-2 flex flex-col h-full">
-                  <MessageChat 
-                    conversationId={activeConversation || ''}
-                    messages={activeConversation ? messages[activeConversation] || [] : []}
-                    participant={getCurrentParticipant() || { id: '', name: '' }}
-                    currentUserId="current-user"
-                    onSendMessage={handleSendMessage}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="gigs" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>My Gigs</CardTitle>
-                <CardDescription>Manage the services you offer.</CardDescription>
-              </div>
-              <Button className="fiverr-button">Create a New Gig</Button>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Star size={64} className="text-gray-300 mb-4" />
-                <h3 className="text-xl font-medium text-fiverr-black">No gigs created yet</h3>
-                <p className="text-fiverr-gray mt-2 max-w-md">
-                  Create your first gig and start offering your services to customers around the world.
-                </p>
-                <Button className="mt-6 fiverr-button">
-                  Create a Gig
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="earnings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Earnings</CardTitle>
-              <CardDescription>Track your revenue and withdraw funds.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <DollarSign size={64} className="text-gray-300 mb-4" />
-                <h3 className="text-xl font-medium text-fiverr-black">No earnings yet</h3>
-                <p className="text-fiverr-gray mt-2 max-w-md">
-                  Complete orders to start earning. Your revenue will appear here once you've been paid.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
-              <CardDescription>Manage your profile and account preferences.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="space-y-4">
-                <h3 className="font-medium text-lg">Personal Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-fiverr-black mb-1">
-                      Display Name
-                    </label>
-                    <Input 
-                      value={user.displayName || ''}
-                      disabled
-                      className="border-fiverr-border-gray"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-fiverr-black mb-1">
-                      Email Address
-                    </label>
-                    <Input 
-                      value={user.email || ''}
-                      disabled
-                      className="border-fiverr-border-gray"
-                    />
-                  </div>
                 </div>
               </div>
               
-              <div className="flex justify-end">
-                <Button className="fiverr-button">
-                  Save Changes
-                </Button>
+              {/* Message content */}
+              <div className="col-span-2 flex flex-col h-[600px]">
+                {activeConversation ? (
+                  <MessageChat 
+                    messages={messages[activeConversation] || []}
+                    participant={getCurrentParticipant()}
+                    onSendMessage={handleSendMessage}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                    <MessageSquare size={48} className="text-fiverr-gray mb-4" />
+                    <h3 className="text-xl font-medium text-fiverr-black mb-2">Your Messages</h3>
+                    <p className="text-fiverr-gray max-w-md">
+                      Select a conversation from the sidebar to view your messages.
+                    </p>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="gigs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Gigs</CardTitle>
+                <CardDescription>Currently published gigs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">2</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Impressions</CardTitle>
+                <CardDescription>Last 30 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">1,245</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Clicks</CardTitle>
+                <CardDescription>Last 30 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">328</div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold">My Gigs</h2>
+            <Button className="fiverr-button">Create New Gig</Button>
+          </div>
+          
+          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray mb-6">
+            <div className="p-6 flex flex-col sm:flex-row gap-4 border-b border-fiverr-border-gray">
+              <img 
+                src="https://fiverr-res.cloudinary.com/t_gig_cards_web,q_auto,f_auto/gigs/231682055/original/edcf8fc8b9aecaa25ce6c68d641f5e367e9ce636.png" 
+                alt="WordPress Website" 
+                className="w-full sm:w-40 h-24 object-cover rounded-md"
+              />
+              <div className="flex-1">
+                <h3 className="text-lg font-medium mb-2">I will create a responsive WordPress website with SEO optimization</h3>
+                <div className="flex items-center text-sm text-fiverr-gray mb-2">
+                  <Star size={14} className="text-yellow-400 fill-yellow-400 mr-1" />
+                  <span>4.9 (231)</span>
+                  <span className="mx-2">•</span>
+                  <span>12 Orders in Queue</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="text-xs">Edit</Button>
+                    <Button variant="outline" size="sm" className="text-xs">Pause</Button>
+                    <Button variant="outline" size="sm" className="text-xs text-red-500 border-red-500 hover:bg-red-50">Delete</Button>
+                  </div>
+                  <div className="text-sm">
+                    <span className="text-fiverr-gray">Starting at:</span>
+                    <span className="font-bold text-fiverr-black ml-1">$120</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 flex flex-col sm:flex-row gap-4">
+              <img 
+                src="https://fiverr-res.cloudinary.com/t_gig_cards_web,q_auto,f_auto/gigs/187855216/original/c2e8a0c473ea5d7a0a86c2f3c79a9e0c7a0e4b96.jpg" 
+                alt="Logo Design" 
+                className="w-full sm:w-40 h-24 object-cover rounded-md"
+              />
+              <div className="flex-1">
+                <h3 className="text-lg font-medium mb-2">I will design a modern and professional logo for your business</h3>
+                <div className="flex items-center text-sm text-fiverr-gray mb-2">
+                  <Star size={14} className="text-yellow-400 fill-yellow-400 mr-1" />
+                  <span>4.8 (156)</span>
+                  <span className="mx-2">•</span>
+                  <span>5 Orders in Queue</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="text-xs">Edit</Button>
+                    <Button variant="outline" size="sm" className="text-xs">Pause</Button>
+                    <Button variant="outline" size="sm" className="text-xs text-red-500 border-red-500 hover:bg-red-50">Delete</Button>
+                  </div>
+                  <div className="text-sm">
+                    <span className="text-fiverr-gray">Starting at:</span>
+                    <span className="font-bold text-fiverr-black ml-1">$50</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="earnings">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Available for Withdrawal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">$1,240</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Earnings this month</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">$850</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Earnings last month</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">$1,120</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Lifetime Earnings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">$12,450</div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray mb-8">
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-6">Recent Earnings</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-fiverr-light-gray">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Order</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Buyer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Service</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-fiverr-border-gray">
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 10, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3250</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Sarah Williams</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Logo Design</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$50</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 5, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3249</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Alex Chen</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">SEO Optimization</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$75</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Jul 28, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3248</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Emily Johnson</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">WordPress Website</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$120</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-center">
+            <Button className="fiverr-button">Withdraw Earnings</Button>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Settings</CardTitle>
+                  <CardDescription>Manage your personal information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
+                      <img 
+                        src={user?.photoURL || "https://via.placeholder.com/150"} 
+                        alt={user?.displayName || "User"} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button variant="outline" size="sm">Change Photo</Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Display Name</label>
+                    <Input defaultValue={user?.displayName || ""} />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email</label>
+                    <Input defaultValue={user?.email || ""} disabled />
+                  </div>
+                  
+                  <Button className="w-full">Save Changes</Button>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="md:col-span-2">
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Account Settings</CardTitle>
+                  <CardDescription>Manage your account preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-medium mb-2">Notifications</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span>Email notifications for new orders</span>
+                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Email notifications for messages</span>
+                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Email notifications for reviews</span>
+                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Marketing emails</span>
+                          <input type="checkbox" className="toggle toggle-success" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Security</h3>
+                      <Button variant="outline">Change Password</Button>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Language & Region</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium">Language</label>
+                          <select className="w-full p-2 border border-fiverr-border-gray rounded-md mt-1">
+                            <option>English</option>
+                            <option>Spanish</option>
+                            <option>French</option>
+                            <option>German</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Currency</label>
+                          <select className="w-full p-2 border border-fiverr-border-gray rounded-md mt-1">
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                            <option>GBP (£)</option>
+                            <option>CAD (C$)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reviews & Feedback</CardTitle>
+                  <CardDescription>Manage reviews you've received</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ReviewList reviews={reviews} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

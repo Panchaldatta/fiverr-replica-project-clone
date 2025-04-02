@@ -1,5 +1,7 @@
 
+import { useState } from 'react';
 import { Star, ThumbsUp } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Review {
   id: string;
@@ -21,6 +23,41 @@ interface ReviewListProps {
 }
 
 const ReviewList = ({ reviews, isLoading = false }: ReviewListProps) => {
+  const [likedReviews, setLikedReviews] = useState<Record<string, boolean>>({});
+  const [helpfulCounts, setHelpfulCounts] = useState<Record<string, number>>(
+    reviews.reduce((acc, review) => {
+      acc[review.id] = review.helpful;
+      return acc;
+    }, {} as Record<string, number>)
+  );
+  const { toast } = useToast();
+  
+  const handleHelpfulClick = (reviewId: string) => {
+    // If already liked, unlike and decrease count
+    if (likedReviews[reviewId]) {
+      setLikedReviews(prev => ({ ...prev, [reviewId]: false }));
+      setHelpfulCounts(prev => ({ 
+        ...prev, 
+        [reviewId]: Math.max(0, (prev[reviewId] || 0) - 1) 
+      }));
+      toast({
+        title: "Rating removed",
+        description: "You've removed your helpful rating for this review",
+      });
+    } else {
+      // If not liked, like and increase count
+      setLikedReviews(prev => ({ ...prev, [reviewId]: true }));
+      setHelpfulCounts(prev => ({ 
+        ...prev, 
+        [reviewId]: (prev[reviewId] || 0) + 1 
+      }));
+      toast({
+        title: "Review rated as helpful",
+        description: "Thank you for rating this review as helpful",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -77,9 +114,16 @@ const ReviewList = ({ reviews, isLoading = false }: ReviewListProps) => {
           
           <div className="flex items-center">
             <span className="text-fiverr-gray text-sm mr-4">Helpful?</span>
-            <button className="flex items-center text-fiverr-gray hover:text-fiverr-green">
-              <ThumbsUp size={16} className="mr-1" />
-              <span>{review.helpful > 0 ? review.helpful : 'Yes'}</span>
+            <button 
+              className={`flex items-center ${likedReviews[review.id] ? 'text-fiverr-green' : 'text-fiverr-gray hover:text-fiverr-green'}`}
+              onClick={() => handleHelpfulClick(review.id)}
+            >
+              <ThumbsUp size={16} className={`mr-1 ${likedReviews[review.id] ? 'fill-fiverr-green' : ''}`} />
+              <span>
+                {helpfulCounts[review.id] > 0 
+                  ? helpfulCounts[review.id] 
+                  : 'Yes'}
+              </span>
             </button>
           </div>
         </div>

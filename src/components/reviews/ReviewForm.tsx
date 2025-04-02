@@ -20,6 +20,16 @@ const ReviewForm = ({ gigId, sellerId, onReviewSubmit }: ReviewFormProps) => {
   const [comment, setComment] = useState('');
   const { toast } = useToast();
 
+  // Text descriptions for each star rating
+  const ratingDescriptions = [
+    "",
+    "Poor - Far below expectations",
+    "Fair - Below average",
+    "Good - Met expectations",
+    "Very Good - Above expectations",
+    "Excellent - Exceeded all expectations"
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -68,29 +78,38 @@ const ReviewForm = ({ gigId, sellerId, onReviewSubmit }: ReviewFormProps) => {
           <label className="block text-sm font-medium text-fiverr-black mb-2">
             Rating
           </label>
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                className="mr-1 focus:outline-none"
-                onMouseEnter={() => setHoveredRating(star)}
-                onMouseLeave={() => setHoveredRating(0)}
-                onClick={() => setRating(star)}
-              >
-                <Star
-                  size={24}
-                  className={`${
-                    star <= (hoveredRating || rating)
-                      ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-gray-300'
-                  }`}
-                />
-              </button>
-            ))}
-            <span className="ml-2 text-sm text-fiverr-gray">
-              {rating > 0 ? `${rating} star${rating !== 1 ? 's' : ''}` : 'Select a rating'}
-            </span>
+          <div className="flex flex-col">
+            <div className="flex mb-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  className="mr-1 focus:outline-none transition-transform hover:scale-110"
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  onClick={() => setRating(star)}
+                >
+                  <Star
+                    size={24}
+                    className={`transition-colors ${
+                      star <= (hoveredRating || rating)
+                        ? 'text-yellow-400 fill-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                </button>
+              ))}
+              <span className="ml-2 text-sm text-fiverr-gray">
+                {rating > 0 
+                  ? `${rating} star${rating !== 1 ? 's' : ''}` 
+                  : 'Select a rating'}
+              </span>
+            </div>
+            {(hoveredRating || rating) > 0 && (
+              <div className="text-sm text-fiverr-black mt-1">
+                {ratingDescriptions[hoveredRating || rating]}
+              </div>
+            )}
           </div>
         </div>
         
@@ -106,9 +125,17 @@ const ReviewForm = ({ gigId, sellerId, onReviewSubmit }: ReviewFormProps) => {
             className="min-h-[120px]"
             rows={4}
           />
+          <div className="text-xs text-fiverr-gray mt-1">
+            {comment.length < 10 
+              ? `${10 - comment.length} more characters needed` 
+              : `${comment.length} characters`}
+          </div>
         </div>
         
-        <Button type="submit" className="fiverr-button">
+        <Button 
+          type="submit" 
+          className={`fiverr-button ${rating === 0 || comment.length < 10 ? 'opacity-70' : ''}`}
+        >
           Submit Review
         </Button>
       </form>

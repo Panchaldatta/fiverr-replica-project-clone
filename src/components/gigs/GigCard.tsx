@@ -1,6 +1,8 @@
 
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Heart } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export interface GigData {
   id: string;
@@ -12,6 +14,7 @@ export interface GigData {
   rating: number;
   reviewCount: number;
   startingPrice: number;
+  liked?: boolean;
 }
 
 interface GigCardProps {
@@ -19,6 +22,23 @@ interface GigCardProps {
 }
 
 const GigCard = ({ gig }: GigCardProps) => {
+  const [isLiked, setIsLiked] = useState<boolean>(gig.liked || false);
+  const { toast } = useToast();
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsLiked(!isLiked);
+    
+    toast({
+      title: isLiked ? "Removed from saved" : "Saved to favorites",
+      description: isLiked 
+        ? "Gig has been removed from your saved list" 
+        : "Gig has been added to your saved list",
+    });
+  };
+
   return (
     <div className="gig-card">
       <Link to={`/gig/${gig.id}`} className="block">
@@ -31,8 +51,17 @@ const GigCard = ({ gig }: GigCardProps) => {
           />
           
           {/* Save button */}
-          <button className="absolute top-3 right-3 h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors">
-            <Heart size={16} className="text-fiverr-gray" />
+          <button 
+            onClick={handleLikeClick}
+            className="absolute top-3 right-3 h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors"
+          >
+            <Heart 
+              size={16} 
+              className={isLiked 
+                ? "text-red-500 fill-red-500" 
+                : "text-fiverr-gray"
+              } 
+            />
           </button>
         </div>
         
