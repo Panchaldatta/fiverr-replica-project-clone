@@ -15,6 +15,8 @@ export interface GigData {
   reviewCount: number;
   startingPrice: number;
   liked?: boolean;
+  description?: string;
+  category?: string;
 }
 
 interface GigCardProps {
@@ -87,9 +89,15 @@ const GigCard = ({ gig }: GigCardProps) => {
           
           {/* Rating */}
           <div className="flex items-center mb-2">
-            <Star size={14} className="text-yellow-400 fill-yellow-400" />
-            <span className="text-sm font-medium ml-1">{gig.rating}</span>
-            <span className="text-sm text-fiverr-gray ml-1">({gig.reviewCount})</span>
+            {gig.reviewCount > 0 ? (
+              <>
+                <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                <span className="text-sm font-medium ml-1">{gig.rating}</span>
+                <span className="text-sm text-fiverr-gray ml-1">({gig.reviewCount})</span>
+              </>
+            ) : (
+              <span className="text-sm text-fiverr-gray">No reviews yet</span>
+            )}
           </div>
           
           {/* Price */}

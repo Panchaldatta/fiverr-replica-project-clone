@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingBag, MessageSquare, Star, Settings, DollarSign } from 'lucide-react';
+import { ShoppingBag, MessageSquare, Star, Settings, DollarSign, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import MessageList, { Conversation, Message } from '@/components/messages/MessageList';
-import MessageChat from '@/components/messages/MessageChat';
+import MessageList from '@/components/messages/MessageList';
+import { Message } from '@/components/messages/MessageList';
+import UserGigsList from '@/components/gigs/UserGigsList';
+import ReviewList from '@/components/reviews/ReviewList';
 import ReviewForm from '@/components/reviews/ReviewForm';
-import ReviewList, { Review } from '@/components/reviews/ReviewList';
+import { GigData } from '@/components/gigs/GigCard';
 
 // Sample data for messages
 const sampleConversations: Conversation[] = [
@@ -198,10 +200,25 @@ const sampleReviews: Review[] = [
 
 const Dashboard = () => {
   const { user, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState('orders');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('gigs');
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>(sampleMessages);
   const [reviews, setReviews] = useState<Review[]>(sampleReviews);
+  const [userGigs, setUserGigs] = useState<GigData[]>([]);
+
+  // Load user gigs from localStorage
+  useEffect(() => {
+    const loadUserGigs = () => {
+      const gigsJson = localStorage.getItem('userGigs');
+      if (gigsJson) {
+        const gigs: GigData[] = JSON.parse(gigsJson);
+        setUserGigs(gigs);
+      }
+    };
+
+    loadUserGigs();
+  }, []);
 
   const handleSendMessage = (content: string) => {
     if (activeConversation) {
@@ -240,6 +257,13 @@ const Dashboard = () => {
     setReviews(prev => [newReview, ...prev]);
   };
 
+  // Refresh gigs data when a gig is deleted
+  const refreshGigs = () => {
+    const gigsJson = localStorage.getItem('userGigs');
+    const gigs: GigData[] = gigsJson ? JSON.parse(gigsJson) : [];
+    setUserGigs(gigs);
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[60vh]">Loading...</div>;
   }
@@ -264,7 +288,7 @@ const Dashboard = () => {
     <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="text-3xl font-bold text-fiverr-black mb-8">My Dashboard</h1>
       
-      <Tabs defaultValue="orders" value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="gigs" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="orders" className="flex items-center gap-2">
             <ShoppingBag size={16} /> Orders
@@ -418,100 +442,27 @@ const Dashboard = () => {
         </TabsContent>
         
         <TabsContent value="gigs">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Gigs</CardTitle>
-                <CardDescription>Currently published gigs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">2</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Impressions</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">1,245</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Clicks</CardTitle>
-                <CardDescription>Last 30 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">328</div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">My Gigs</h2>
-            <Button className="fiverr-button">Create New Gig</Button>
-          </div>
-          
-          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray mb-6">
-            <div className="p-6 flex flex-col sm:flex-row gap-4 border-b border-fiverr-border-gray">
-              <img 
-                src="https://fiverr-res.cloudinary.com/t_gig_cards_web,q_auto,f_auto/gigs/231682055/original/edcf8fc8b9aecaa25ce6c68d641f5e367e9ce636.png" 
-                alt="WordPress Website" 
-                className="w-full sm:w-40 h-24 object-cover rounded-md"
-              />
-              <div className="flex-1">
-                <h3 className="text-lg font-medium mb-2">I will create a responsive WordPress website with SEO optimization</h3>
-                <div className="flex items-center text-sm text-fiverr-gray mb-2">
-                  <Star size={14} className="text-yellow-400 fill-yellow-400 mr-1" />
-                  <span>4.9 (231)</span>
-                  <span className="mx-2">•</span>
-                  <span>12 Orders in Queue</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="text-xs">Edit</Button>
-                    <Button variant="outline" size="sm" className="text-xs">Pause</Button>
-                    <Button variant="outline" size="sm" className="text-xs text-red-500 border-red-500 hover:bg-red-50">Delete</Button>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-fiverr-gray">Starting at:</span>
-                    <span className="font-bold text-fiverr-black ml-1">$120</span>
-                  </div>
-                </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>My Gigs</CardTitle>
+                <CardDescription>Manage the services you offer</CardDescription>
               </div>
-            </div>
-            
-            <div className="p-6 flex flex-col sm:flex-row gap-4">
-              <img 
-                src="https://fiverr-res.cloudinary.com/t_gig_cards_web,q_auto,f_auto/gigs/187855216/original/c2e8a0c473ea5d7a0a86c2f3c79a9e0c7a0e4b96.jpg" 
-                alt="Logo Design" 
-                className="w-full sm:w-40 h-24 object-cover rounded-md"
+              <Button 
+                className="fiverr-button flex items-center gap-1"
+                onClick={() => navigate('/gig/create')}
+              >
+                <Plus size={16} />
+                Create New Gig
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <UserGigsList 
+                gigs={userGigs} 
+                onGigDeleted={refreshGigs}
               />
-              <div className="flex-1">
-                <h3 className="text-lg font-medium mb-2">I will design a modern and professional logo for your business</h3>
-                <div className="flex items-center text-sm text-fiverr-gray mb-2">
-                  <Star size={14} className="text-yellow-400 fill-yellow-400 mr-1" />
-                  <span>4.8 (156)</span>
-                  <span className="mx-2">•</span>
-                  <span>5 Orders in Queue</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" className="text-xs">Edit</Button>
-                    <Button variant="outline" size="sm" className="text-xs">Pause</Button>
-                    <Button variant="outline" size="sm" className="text-xs text-red-500 border-red-500 hover:bg-red-50">Delete</Button>
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-fiverr-gray">Starting at:</span>
-                    <span className="font-bold text-fiverr-black ml-1">$50</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="earnings">

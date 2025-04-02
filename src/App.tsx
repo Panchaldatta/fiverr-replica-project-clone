@@ -15,6 +15,8 @@ import Join from "./pages/Join";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import SellerProfile from "./pages/SellerProfile";
+import CreateGig from "./pages/CreateGig";
+import EditGig from "./pages/EditGig";
 
 // Create the query client
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => {
                   <Route index element={<Index />} />
                   <Route path="categories/:category" element={<CategoryPage />} />
                   <Route path="gig/:id" element={<GigDetail />} />
+                  <Route path="gig/create" element={<CreateGig />} />
+                  <Route path="gig/edit/:id" element={<EditGig />} />
                   <Route path="signin" element={<SignIn />} />
                   <Route path="join" element={<Join />} />
                   <Route path="dashboard" element={<Dashboard />} />
