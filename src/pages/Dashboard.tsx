@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShoppingBag, MessageSquare, Star, Settings, DollarSign } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import MessageList, { Conversation } from '@/components/messages/MessageList';
-import MessageChat, { Message } from '@/components/messages/MessageChat';
+import MessageList, { Conversation, Message } from '@/components/messages/MessageList';
+import MessageChat from '@/components/messages/MessageChat';
 import ReviewForm from '@/components/reviews/ReviewForm';
 import ReviewList, { Review } from '@/components/reviews/ReviewList';
 
