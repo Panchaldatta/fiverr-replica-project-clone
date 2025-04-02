@@ -1,268 +1,159 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingBag, MessageSquare, Star, Settings, DollarSign, Plus } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import MessageList from '@/components/messages/MessageList';
-import { Message } from '@/components/messages/MessageList';
+
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Circle, DollarSign, PieChart, ShoppingCart, Star, MessageCircle, X } from 'lucide-react';
 import UserGigsList from '@/components/gigs/UserGigsList';
-import ReviewList from '@/components/reviews/ReviewList';
-import ReviewForm from '@/components/reviews/ReviewForm';
+import { useAuth } from '@/context/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { GigData } from '@/components/gigs/GigCard';
-
-// Sample data for messages
-const sampleConversations: Conversation[] = [
-  {
-    id: 'conv-1',
-    participantId: 'user-123',
-    participantName: 'Jane Smith',
-    participantAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-    lastMessage: "I've reviewed your requirements and I can definitely help with your WordPress project.",
-    timestamp: '2 hours ago',
-    unread: 1
-  },
-  {
-    id: 'conv-2',
-    participantId: 'user-456',
-    participantName: 'Mark Johnson',
-    participantAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    lastMessage: "Thanks for your order! I'll start working on it right away.",
-    timestamp: 'Yesterday',
-    unread: 0
-  },
-  {
-    id: 'conv-3',
-    participantId: 'user-789',
-    participantName: 'Sarah Williams',
-    participantAvatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-    lastMessage: 'The final files have been delivered. Please let me know if you need any revisions.',
-    timestamp: '3 days ago',
-    unread: 0
-  }
-];
-
-const sampleMessages: Record<string, Message[]> = {
-  'conv-1': [
-    {
-      id: 'msg-1',
-      content: "Hello! I saw your profile and I'm interested in your WordPress development services.",
-      senderId: 'current-user',
-      receiverId: 'user-123',
-      senderName: 'You',
-      timestamp: '2 days ago',
-      read: true
-    },
-    {
-      id: 'msg-2',
-      content: "Hi there! Thanks for reaching out. I'd be happy to help with your WordPress needs. Could you tell me more about your project?",
-      senderId: 'user-123',
-      receiverId: 'current-user',
-      senderName: 'Jane Smith',
-      senderAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-      timestamp: '2 days ago',
-      read: true
-    },
-    {
-      id: 'msg-3',
-      content: 'I need a responsive e-commerce website with about 5-7 pages and product catalog integration.',
-      senderId: 'current-user',
-      receiverId: 'user-123',
-      senderName: 'You',
-      timestamp: '1 day ago',
-      read: true
-    },
-    {
-      id: 'msg-4',
-      content: "I've reviewed your requirements and I can definitely help with your WordPress project. Would you like to proceed with my standard package?",
-      senderId: 'user-123',
-      receiverId: 'current-user',
-      senderName: 'Jane Smith',
-      senderAvatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-      timestamp: '2 hours ago',
-      read: false
-    }
-  ],
-  'conv-2': [
-    {
-      id: 'msg-5',
-      content: "I'd like to order your Basic WordPress website package.",
-      senderId: 'current-user',
-      receiverId: 'user-456',
-      senderName: 'You',
-      timestamp: '3 days ago',
-      read: true
-    },
-    {
-      id: 'msg-6',
-      content: "Great choice! I'll create a custom order for you right away.",
-      senderId: 'user-456',
-      receiverId: 'current-user',
-      senderName: 'Mark Johnson',
-      senderAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      timestamp: '3 days ago',
-      read: true
-    },
-    {
-      id: 'msg-7',
-      content: "I've sent you a custom offer. Please check and accept it when you're ready.",
-      senderId: 'user-456',
-      receiverId: 'current-user',
-      senderName: 'Mark Johnson',
-      senderAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      timestamp: '2 days ago',
-      read: true
-    },
-    {
-      id: 'msg-8',
-      content: "I've accepted the offer and made the payment.",
-      senderId: 'current-user',
-      receiverId: 'user-456',
-      senderName: 'You',
-      timestamp: '2 days ago',
-      read: true
-    },
-    {
-      id: 'msg-9',
-      content: "Thanks for your order! I'll start working on it right away.",
-      senderId: 'user-456',
-      receiverId: 'current-user',
-      senderName: 'Mark Johnson',
-      senderAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      timestamp: 'Yesterday',
-      read: true
-    }
-  ],
-  'conv-3': [
-    {
-      id: 'msg-10',
-      content: "How's my logo design coming along?",
-      senderId: 'current-user',
-      receiverId: 'user-789',
-      senderName: 'You',
-      timestamp: '4 days ago',
-      read: true
-    },
-    {
-      id: 'msg-11',
-      content: "It's going well! I've completed the initial concepts and will send them to you shortly.",
-      senderId: 'user-789',
-      receiverId: 'current-user',
-      senderName: 'Sarah Williams',
-      senderAvatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-      timestamp: '4 days ago',
-      read: true
-    },
-    {
-      id: 'msg-12',
-      content: "I've just delivered the final files. Please check them out and let me know if you need any revisions.",
-      senderId: 'user-789',
-      receiverId: 'current-user',
-      senderName: 'Sarah Williams',
-      senderAvatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-      timestamp: '3 days ago',
-      read: true
-    }
-  ]
-};
-
-// Sample reviews
-const sampleReviews: Review[] = [
-  {
-    id: 'review-1',
-    user: {
-      id: 'user-123',
-      name: 'Jessica Lee',
-      avatar: 'https://randomuser.me/api/portraits/women/33.jpg',
-      country: 'United States'
-    },
-    rating: 5,
-    comment: 'Incredible work! The delivery was faster than expected and the quality exceeded my expectations. Will definitely work with this seller again.',
-    date: '1 week ago',
-    helpful: 3
-  },
-  {
-    id: 'review-2',
-    user: {
-      id: 'user-456',
-      name: 'Michael Rodriguez',
-      avatar: 'https://randomuser.me/api/portraits/men/54.jpg',
-      country: 'Spain'
-    },
-    rating: 4,
-    comment: 'Great service overall. Communication was smooth and the final product was good. Just needed a few minor revisions.',
-    date: '2 weeks ago',
-    helpful: 1
-  }
-];
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Conversation, Review, MessageChatProps } from '@/types/dashboard';
 
 const Dashboard = () => {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('gigs');
-  const [activeConversation, setActiveConversation] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Record<string, Message[]>>(sampleMessages);
-  const [reviews, setReviews] = useState<Review[]>(sampleReviews);
-  const [userGigs, setUserGigs] = useState<GigData[]>([]);
-
+  const [activeChat, setActiveChat] = useState<string | null>(null);
+  
   // Load user gigs from localStorage
-  useEffect(() => {
-    const loadUserGigs = () => {
-      const gigsJson = localStorage.getItem('userGigs');
-      if (gigsJson) {
-        const gigs: GigData[] = JSON.parse(gigsJson);
-        setUserGigs(gigs);
-      }
-    };
-
-    loadUserGigs();
-  }, []);
-
-  const handleSendMessage = (content: string) => {
-    if (activeConversation) {
-      const newMessage: Message = {
-        id: `msg-${Date.now()}`,
-        content,
-        senderId: 'current-user',
-        receiverId: sampleConversations.find(c => c.id === activeConversation)?.participantId || '',
-        senderName: 'You',
-        timestamp: 'Just now',
-        read: true
-      };
-
-      setMessages(prev => ({
-        ...prev,
-        [activeConversation]: [...(prev[activeConversation] || []), newMessage]
-      }));
-    }
-  };
-
-  const handleReviewSubmit = (review: { rating: number; comment: string }) => {
-    const newReview: Review = {
-      id: `review-${Date.now()}`,
-      user: {
-        id: user?.uid || 'unknown',
-        name: user?.displayName || 'Anonymous',
-        avatar: user?.photoURL || 'https://via.placeholder.com/150',
-        country: 'Unknown Location'
-      },
-      rating: review.rating,
-      comment: review.comment,
-      date: 'Just now',
-      helpful: 0
-    };
-
-    setReviews(prev => [newReview, ...prev]);
-  };
-
-  // Refresh gigs data when a gig is deleted
-  const refreshGigs = () => {
+  const getUserGigs = (): GigData[] => {
     const gigsJson = localStorage.getItem('userGigs');
-    const gigs: GigData[] = gigsJson ? JSON.parse(gigsJson) : [];
-    setUserGigs(gigs);
+    const allGigs = gigsJson ? JSON.parse(gigsJson) : [];
+    return allGigs.filter((gig: GigData) => gig.sellerName === user?.displayName);
   };
+
+  // Mock data
+  const orders = [
+    { id: '1', title: 'Logo Design', buyer: 'John D.', price: 50, status: 'In Progress', dueDate: '2023-09-15' },
+    { id: '2', title: 'Website Redesign', buyer: 'Sarah M.', price: 250, status: 'Delivered', dueDate: '2023-09-10' },
+    { id: '3', title: 'Mobile App UI', buyer: 'Robert J.', price: 350, status: 'Completed', dueDate: '2023-09-05' }
+  ];
+
+  const earnings = {
+    total: 650,
+    pending: 50,
+    withdrawn: 600,
+    available: 0
+  };
+
+  const activeOrders = 1;
+  const completedOrders = 2;
+  const cancelledOrders = 0;
+
+  const conversations: Conversation[] = [
+    {
+      id: '1',
+      username: 'John Smith',
+      avatar: 'https://via.placeholder.com/40',
+      lastMessage: 'Hi, I have a question about your gig...',
+      timestamp: '2 hours ago',
+      unread: true
+    },
+    {
+      id: '2',
+      username: 'Emma Watson',
+      avatar: 'https://via.placeholder.com/40',
+      lastMessage: 'Thanks for the quick response!',
+      timestamp: '1 day ago',
+      unread: false
+    },
+    {
+      id: '3',
+      username: 'Michael Brown',
+      avatar: 'https://via.placeholder.com/40',
+      lastMessage: 'Looking forward to working with you!',
+      timestamp: '2 days ago',
+      unread: false
+    }
+  ];
+
+  // Mock message chat component
+  const MessageChat = ({ isOpen, onClose }: MessageChatProps) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 bg-white">
+        <div className="flex flex-col h-full">
+          {/* Chat header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center">
+              <img 
+                src="https://via.placeholder.com/40" 
+                alt="User avatar" 
+                className="w-10 h-10 rounded-full mr-3"
+              />
+              <div>
+                <h3 className="font-medium">John Smith</h3>
+                <p className="text-xs text-fiverr-gray">Active now</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-1">
+              <X size={20} />
+            </button>
+          </div>
+          
+          {/* Chat messages */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-end">
+                <img 
+                  src="https://via.placeholder.com/40" 
+                  alt="User avatar" 
+                  className="w-8 h-8 rounded-full mr-2"
+                />
+                <div className="bg-gray-100 rounded-lg p-3 max-w-[75%]">
+                  <p>Hi, I have a question about your gig...</p>
+                  <span className="text-xs text-fiverr-gray mt-1">2:30 PM</span>
+                </div>
+              </div>
+              
+              <div className="flex items-end justify-end">
+                <div className="bg-fiverr-green text-white rounded-lg p-3 max-w-[75%]">
+                  <p>Sure, I'd be happy to help! What would you like to know?</p>
+                  <span className="text-xs text-white/80 mt-1">2:32 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Message input */}
+          <div className="p-4 border-t">
+            <div className="flex">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                className="flex-1 border rounded-l-md p-2"
+              />
+              <button className="bg-fiverr-green text-white px-4 py-2 rounded-r-md">
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const reviews: Review[] = [
+    {
+      id: '1',
+      username: 'Sarah M.',
+      avatar: 'https://via.placeholder.com/40',
+      rating: 5,
+      content: 'Excellent work! Will definitely hire again.',
+      date: '2 weeks ago',
+      gigTitle: 'Logo Design'
+    },
+    {
+      id: '2',
+      username: 'Robert J.',
+      avatar: 'https://via.placeholder.com/40',
+      rating: 4,
+      content: 'Good job, but took a bit longer than expected.',
+      date: '1 month ago',
+      gigTitle: 'Website Redesign'
+    }
+  ];
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-[60vh]">Loading...</div>;
@@ -272,393 +163,300 @@ const Dashboard = () => {
     return <Navigate to="/signin" replace />;
   }
 
-  const getCurrentParticipant = () => {
-    if (!activeConversation) return null;
-    const conversation = sampleConversations.find(c => c.id === activeConversation);
-    if (!conversation) return null;
-    
-    return {
-      id: conversation.participantId,
-      name: conversation.participantName,
-      avatar: conversation.participantAvatar
-    };
-  };
-
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-3xl font-bold text-fiverr-black mb-8">My Dashboard</h1>
+    <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-fiverr-black">Dashboard</h1>
+          <p className="text-fiverr-gray">Welcome back, {user.displayName}!</p>
+        </div>
+        <div className="mt-4 md:mt-0">
+          <Link to="/gig/create">
+            <Button className="bg-fiverr-green hover:bg-fiverr-dark-green">
+              Create New Gig
+            </Button>
+          </Link>
+        </div>
+      </div>
       
-      <Tabs defaultValue="gigs" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-8">
-          <TabsTrigger value="orders" className="flex items-center gap-2">
-            <ShoppingBag size={16} /> Orders
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-md mr-4">
+                <ShoppingCart size={24} className="text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-fiverr-gray">Active Orders</p>
+                <h4 className="text-2xl font-bold">{activeOrders}</h4>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-md mr-4">
+                <Circle size={24} className="text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-fiverr-gray">Completed Orders</p>
+                <h4 className="text-2xl font-bold">{completedOrders}</h4>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-red-100 rounded-md mr-4">
+                <X size={24} className="text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-fiverr-gray">Cancelled Orders</p>
+                <h4 className="text-2xl font-bold">{cancelledOrders}</h4>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-md mr-4">
+                <DollarSign size={24} className="text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-fiverr-gray">Total Earnings</p>
+                <h4 className="text-2xl font-bold">${earnings.total}</h4>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Dashboard Tabs */}
+      <Tabs defaultValue="gigs" className="w-full">
+        <TabsList className="mb-8 border-b w-full justify-start rounded-none bg-transparent space-x-8">
+          <TabsTrigger 
+            value="gigs"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-fiverr-green rounded-none border-b-2 border-transparent px-1 pb-2"
+          >
+            My Gigs
           </TabsTrigger>
-          <TabsTrigger value="messages" className="flex items-center gap-2">
-            <MessageSquare size={16} /> Messages
+          <TabsTrigger 
+            value="orders"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-fiverr-green rounded-none border-b-2 border-transparent px-1 pb-2"
+          >
+            Orders
           </TabsTrigger>
-          <TabsTrigger value="gigs" className="flex items-center gap-2">
-            <Star size={16} /> My Gigs
+          <TabsTrigger 
+            value="earnings"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-fiverr-green rounded-none border-b-2 border-transparent px-1 pb-2"
+          >
+            Earnings
           </TabsTrigger>
-          <TabsTrigger value="earnings" className="flex items-center gap-2">
-            <DollarSign size={16} /> Earnings
+          <TabsTrigger 
+            value="messages"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-fiverr-green rounded-none border-b-2 border-transparent px-1 pb-2"
+          >
+            Messages
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings size={16} /> Settings
+          <TabsTrigger 
+            value="reviews"
+            className="data-[state=active]:border-b-2 data-[state=active]:border-fiverr-green rounded-none border-b-2 border-transparent px-1 pb-2"
+          >
+            Reviews
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="orders">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Orders</CardTitle>
-                <CardDescription>Orders currently in progress</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">3</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Completed Orders</CardTitle>
-                <CardDescription>Successfully delivered orders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">27</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Cancelled Orders</CardTitle>
-                <CardDescription>Orders that were cancelled</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">2</div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4">Recent Orders</h2>
-            <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray">
+        <TabsContent value="gigs" className="mt-0">
+          <UserGigsList />
+        </TabsContent>
+        
+        <TabsContent value="orders" className="mt-0">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Orders</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead>
-                    <tr className="bg-fiverr-light-gray">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Order</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Buyer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Service</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Due On</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Status</th>
+                  <thead className="text-xs text-fiverr-gray border-b">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Order</th>
+                      <th className="px-4 py-3 text-left">Buyer</th>
+                      <th className="px-4 py-3 text-left">Price</th>
+                      <th className="px-4 py-3 text-left">Status</th>
+                      <th className="px-4 py-3 text-left">Due</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-fiverr-border-gray">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3251</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Mark Johnson</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">WordPress Website</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 15, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$120</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          In Progress
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3250</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Sarah Williams</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Logo Design</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 10, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$50</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          Delivered
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3249</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Alex Chen</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">SEO Optimization</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 5, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">$75</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          Completed
-                        </span>
-                      </td>
-                    </tr>
+                  <tbody>
+                    {orders.map(order => (
+                      <tr key={order.id} className="border-b">
+                        <td className="px-4 py-3">{order.title}</td>
+                        <td className="px-4 py-3">{order.buyer}</td>
+                        <td className="px-4 py-3">${order.price}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            order.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                            order.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">{order.dueDate}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="messages">
-          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray">
-            <div className="grid grid-cols-1 md:grid-cols-3">
-              {/* Messages sidebar */}
-              <div className="border-r border-fiverr-border-gray">
-                <div className="p-4 border-b border-fiverr-border-gray">
-                  <Input 
-                    placeholder="Search messages..." 
-                    className="w-full"
-                  />
-                </div>
-                <div className="h-[600px] overflow-y-auto">
-                  <MessageList 
-                    conversations={sampleConversations}
-                    activeConversationId={activeConversation}
-                    onSelectConversation={(id) => setActiveConversation(id)}
-                  />
-                </div>
-              </div>
-              
-              {/* Message content */}
-              <div className="col-span-2 flex flex-col h-[600px]">
-                {activeConversation ? (
-                  <MessageChat 
-                    messages={messages[activeConversation] || []}
-                    participant={getCurrentParticipant()}
-                    onSendMessage={handleSendMessage}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                    <MessageSquare size={48} className="text-fiverr-gray mb-4" />
-                    <h3 className="text-xl font-medium text-fiverr-black mb-2">Your Messages</h3>
-                    <p className="text-fiverr-gray max-w-md">
-                      Select a conversation from the sidebar to view your messages.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="gigs">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>My Gigs</CardTitle>
-                <CardDescription>Manage the services you offer</CardDescription>
-              </div>
-              <Button 
-                className="fiverr-button flex items-center gap-1"
-                onClick={() => navigate('/gig/create')}
-              >
-                <Plus size={16} />
-                Create New Gig
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <UserGigsList 
-                gigs={userGigs} 
-                onGigDeleted={refreshGigs}
-              />
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="earnings">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <TabsContent value="earnings" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Available for Withdrawal</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle>Earnings Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">$1,240</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-fiverr-gray">Total Earnings</span>
+                    <span className="font-bold">${earnings.total}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-fiverr-gray">Pending Clearance</span>
+                    <span className="font-bold">${earnings.pending}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-fiverr-gray">Withdrawn</span>
+                    <span className="font-bold">${earnings.withdrawn}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-fiverr-gray">Available for Withdrawal</span>
+                    <span className="font-bold">${earnings.available}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle>Earnings this month</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle>Earnings Breakdown</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">$850</div>
+              <CardContent className="flex justify-center items-center h-[200px]">
+                <div className="text-center">
+                  <PieChart size={80} className="mx-auto text-fiverr-gray" />
+                  <p className="mt-4 text-fiverr-gray">Earnings visualization not available in demo</p>
+                </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Earnings last month</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">$1,120</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Lifetime Earnings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">$12,450</div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray mb-8">
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-6">Recent Earnings</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-fiverr-light-gray">
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Order</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Buyer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Service</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-fiverr-gray uppercase tracking-wider">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-fiverr-border-gray">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 10, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3250</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Sarah Williams</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Logo Design</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$50</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Aug 5, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3249</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Alex Chen</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">SEO Optimization</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$75</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Jul 28, 2023</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">#FO-3248</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">Emily Johnson</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-fiverr-black">WordPress Website</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fiverr-black">$120</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-center">
-            <Button className="fiverr-button">Withdraw Earnings</Button>
           </div>
         </TabsContent>
         
-        <TabsContent value="settings">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Settings</CardTitle>
-                  <CardDescription>Manage your personal information</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 rounded-full overflow-hidden mb-4">
+        <TabsContent value="messages" className="mt-0">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Messages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {conversations.map(conversation => (
+                  <div 
+                    key={conversation.id}
+                    onClick={() => setActiveChat(conversation.id)}
+                    className="flex items-center p-3 rounded-md hover:bg-gray-50 cursor-pointer"
+                  >
+                    <div className="relative">
                       <img 
-                        src={user?.photoURL || "https://via.placeholder.com/150"} 
-                        alt={user?.displayName || "User"} 
-                        className="w-full h-full object-cover"
+                        src={conversation.avatar} 
+                        alt={conversation.username} 
+                        className="w-10 h-10 rounded-full mr-3"
                       />
+                      {conversation.unread && (
+                        <span className="absolute top-0 right-2 w-3 h-3 bg-fiverr-green rounded-full"></span>
+                      )}
                     </div>
-                    <Button variant="outline" size="sm">Change Photo</Button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium truncate">{conversation.username}</h4>
+                        <span className="text-xs text-fiverr-gray">{conversation.timestamp}</span>
+                      </div>
+                      <p className="text-sm text-fiverr-gray truncate">{conversation.lastMessage}</p>
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Display Name</label>
-                    <Input defaultValue={user?.displayName || ""} />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email</label>
-                    <Input defaultValue={user?.email || ""} disabled />
-                  </div>
-                  
-                  <Button className="w-full">Save Changes</Button>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="md:col-span-2">
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Account Settings</CardTitle>
-                  <CardDescription>Manage your account preferences</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-medium mb-2">Notifications</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span>Email notifications for new orders</span>
-                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Email notifications for messages</span>
-                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Email notifications for reviews</span>
-                          <input type="checkbox" defaultChecked className="toggle toggle-success" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>Marketing emails</span>
-                          <input type="checkbox" className="toggle toggle-success" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {activeChat && (
+            <MessageChat 
+              isOpen={!!activeChat}
+              onClose={() => setActiveChat(null)}
+            />
+          )}
+        </TabsContent>
+        
+        <TabsContent value="reviews" className="mt-0">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Reviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {reviews.map(review => (
+                  <div key={review.id} className="border-b pb-6 last:border-0 last:pb-0">
+                    <div className="flex items-center mb-3">
+                      <img 
+                        src={review.avatar} 
+                        alt={review.username} 
+                        className="w-10 h-10 rounded-full mr-3"
+                      />
+                      <div>
+                        <h4 className="font-medium">{review.username}</h4>
+                        <div className="flex items-center">
+                          <div className="flex">
+                            {Array(5).fill(0).map((_, i) => (
+                              <Star 
+                                key={i} 
+                                size={14} 
+                                className={i < review.rating 
+                                  ? "text-yellow-400 fill-yellow-400" 
+                                  : "text-gray-300"
+                                } 
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-fiverr-gray ml-2">{review.date}</span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-2">Security</h3>
-                      <Button variant="outline">Change Password</Button>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-2">Language & Region</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium">Language</label>
-                          <select className="w-full p-2 border border-fiverr-border-gray rounded-md mt-1">
-                            <option>English</option>
-                            <option>Spanish</option>
-                            <option>French</option>
-                            <option>German</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Currency</label>
-                          <select className="w-full p-2 border border-fiverr-border-gray rounded-md mt-1">
-                            <option>USD ($)</option>
-                            <option>EUR (€)</option>
-                            <option>GBP (£)</option>
-                            <option>CAD (C$)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
+                    {review.gigTitle && (
+                      <p className="text-sm text-fiverr-green mb-1">
+                        For: {review.gigTitle}
+                      </p>
+                    )}
+                    <p className="text-sm text-fiverr-black">{review.content}</p>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Reviews & Feedback</CardTitle>
-                  <CardDescription>Manage reviews you've received</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ReviewList reviews={reviews} />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                ))}
+
+                {reviews.length === 0 && (
+                  <div className="text-center py-8">
+                    <Star size={40} className="mx-auto text-gray-300" />
+                    <p className="mt-2 text-fiverr-gray">No reviews yet</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

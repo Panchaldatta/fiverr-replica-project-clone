@@ -23,32 +23,30 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  <Route index element={<Index />} />
-                  <Route path="categories/:category" element={<CategoryPage />} />
-                  <Route path="gig/:id" element={<GigDetail />} />
-                  <Route path="gig/create" element={<CreateGig />} />
-                  <Route path="gig/edit/:id" element={<EditGig />} />
-                  <Route path="signin" element={<SignIn />} />
-                  <Route path="join" element={<Join />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="profile/:username" element={<SellerProfile />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Index />} />
+                <Route path="categories/:category" element={<CategoryPage />} />
+                <Route path="gig/:id" element={<GigDetail />} />
+                <Route path="gig/create" element={<CreateGig />} />
+                <Route path="gig/edit/:id" element={<EditGig />} />
+                <Route path="signin" element={<SignIn />} />
+                <Route path="join" element={<Join />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="profile/:username" element={<SellerProfile />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
           </TooltipProvider>
         </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 
