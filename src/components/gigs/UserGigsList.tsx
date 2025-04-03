@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GigData } from './GigCard';
 import { Star, Edit, Trash2 } from 'lucide-react';
@@ -25,6 +25,12 @@ const UserGigsList = ({ gigs, onGigDeleted }: UserGigsListProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [gigToDelete, setGigToDelete] = useState<string | null>(null);
+  const [localGigs, setLocalGigs] = useState<GigData[]>(gigs);
+  
+  // Update local gigs when props change
+  useEffect(() => {
+    setLocalGigs(gigs);
+  }, [gigs]);
 
   const handleEdit = (gigId: string) => {
     navigate(`/gig/edit/${gigId}`);
@@ -46,6 +52,9 @@ const UserGigsList = ({ gigs, onGigDeleted }: UserGigsListProps) => {
         
         // Save back to localStorage
         localStorage.setItem('userGigs', JSON.stringify(updatedGigs));
+        
+        // Update local state
+        setLocalGigs(updatedGigs);
         
         // Notify user
         toast({
@@ -70,7 +79,7 @@ const UserGigsList = ({ gigs, onGigDeleted }: UserGigsListProps) => {
     setGigToDelete(null);
   };
 
-  if (gigs.length === 0) {
+  if (localGigs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Star size={64} className="text-gray-300 mb-4" />
@@ -90,7 +99,7 @@ const UserGigsList = ({ gigs, onGigDeleted }: UserGigsListProps) => {
 
   return (
     <div className="space-y-6">
-      {gigs.map((gig) => (
+      {localGigs.map((gig) => (
         <div 
           key={gig.id} 
           className="bg-white rounded-md overflow-hidden border border-fiverr-border-gray flex flex-col sm:flex-row"
