@@ -15,10 +15,10 @@ const SellerProfile = () => {
   const [activeTab, setActiveTab] = useState('gigs');
   
   // This would normally fetch the seller data from a backend
-  // For demo purposes, we're using the current user's data
+  // For demo purposes, we're using hardcoded data instead of user data since authentication is removed
   const seller = {
-    displayName: user?.displayName || 'John Doe',
-    photoURL: user?.photoURL,
+    displayName: 'John Doe',
+    photoURL: 'https://randomuser.me/api/portraits/men/32.jpg',
     username: username || 'john-doe',
     location: 'San Francisco, USA',
     memberSince: 'March 2023',

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Star, ThumbsUp, Clock, ChevronDown, ChevronUp, CheckCircle, XCircle, MessageSquare, Heart } from 'lucide-react';
@@ -169,9 +170,9 @@ const GigDetail = () => {
     const newReview: Review = {
       id: `review-${Date.now()}`,
       user: {
-        id: user?.uid || 'unknown',
-        name: user?.displayName || 'Anonymous',
-        avatar: user?.photoURL || 'https://via.placeholder.com/150',
+        id: user.uid || 'unknown',
+        name: user.displayName || 'Anonymous',
+        avatar: user.photoURL || 'https://via.placeholder.com/150',
         country: 'Unknown Location'
       },
       rating: review.rating,

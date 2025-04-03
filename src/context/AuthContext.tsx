@@ -1,9 +1,16 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 
+// Define a mock user object type
+export type MockUser = {
+  displayName: string;
+  photoURL: string | null;
+  uid: string;
+};
+
 type AuthContextType = {
-  user: null;
-  isLoading: false;
+  user: MockUser | null;
+  isLoading: boolean;
   signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<any>;
 };
@@ -16,6 +23,13 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Mock user for demo purposes
+  const mockUser: MockUser = {
+    displayName: 'Demo User',
+    photoURL: 'https://randomuser.me/api/portraits/men/32.jpg',
+    uid: 'demo-user-123',
+  };
+
   const handleSignInWithGoogle = async () => {
     console.log("Sign in with Google clicked (authentication removed)");
     return { success: false };
@@ -29,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider
       value={{
-        user: null,
+        user: null, // Set to mockUser if you want to simulate a logged-in state
         isLoading: false,
         signInWithGoogle: handleSignInWithGoogle,
         signOut: handleSignOut,
