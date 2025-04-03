@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const isLoggedIn = false; // Always false since auth is removed
+  const isLoggedIn = !!user; // Check if user exists
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,7 +105,8 @@ const Header = () => {
                 <Link to="/business" className="nav-link whitespace-nowrap hidden lg:block">
                   Fiverr Business
                 </Link>
-                {!isLoggedIn && (
+                
+                {!isLoggedIn ? (
                   <>
                     <Link to="/become-seller" className="nav-link whitespace-nowrap hidden lg:block">
                       Become a Seller
@@ -119,6 +119,38 @@ const Header = () => {
                         Join
                       </Button>
                     </Link>
+                  </>
+                ) : (
+                  <>
+                    {/* User is logged in - show user menu */}
+                    <Link to="/dashboard" className="nav-link whitespace-nowrap hidden lg:block">
+                      Dashboard
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Avatar className="h-8 w-8 cursor-pointer">
+                          <AvatarImage src={user.photoURL || ''} alt={user.displayName} />
+                          <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <div className="px-4 py-2">
+                          <p className="font-medium">{user.displayName}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard" className="w-full">Dashboard</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={`/profile/${user.uid}`} className="w-full">Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleSignOut}>
+                          Sign out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
               </>
@@ -138,6 +170,26 @@ const Header = () => {
                   Join
                 </Button>
               </Link>
+            )}
+            
+            {/* Mobile user avatar (if logged in) */}
+            {isMobile && isLoggedIn && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarImage src={user.photoURL || ''} alt={user.displayName} />
+                    <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="w-full">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -172,7 +224,23 @@ const Header = () => {
                     <Link to="/join" className="nav-link text-lg font-medium">Join</Link>
                   </div>
                 </>
-              ) : null}
+              ) : (
+                <div className="flex flex-col space-y-4 mb-8">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.photoURL || ''} alt={user.displayName} />
+                      <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user.displayName}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                  <Link to={`/profile/${user.uid}`} className="nav-link">Profile</Link>
+                  <button onClick={handleSignOut} className="nav-link text-left">Sign out</button>
+                </div>
+              )}
 
               <div className="py-4 border-t border-fiverr-border-gray">
                 <h3 className="text-lg font-semibold mb-4">Categories</h3>
