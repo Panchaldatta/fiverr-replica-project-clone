@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAx5WBpnEsSnlgithEzFAwrk0FhMUumCyg",
+  apiKey: "AIzaSyCbLPOldliBpA9ztf3PqJYCGtzZNnDQl5g",
   authDomain: "lovable-fiverr-clone-auth.firebaseapp.com",
   projectId: "lovable-fiverr-clone-auth",
   storageBucket: "lovable-fiverr-clone-auth.appspot.com",
