@@ -3,38 +3,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Circle, DollarSign, PieChart, ShoppingCart, Star, MessageCircle, X } from 'lucide-react';
 import UserGigsList from '@/components/gigs/UserGigsList';
-import { useAuth } from '@/context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { GigData } from '@/components/gigs/GigCard';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { Conversation, Review, MessageChatProps } from '@/types/dashboard';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
-  const { user, isLoading } = useAuth();
+  const { toast } = useToast();
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [userGigs, setUserGigs] = useState<GigData[]>([]);
   
-  // Load user gigs from localStorage
-  const getUserGigs = (): GigData[] => {
-    const gigsJson = localStorage.getItem('userGigs');
-    const allGigs = gigsJson ? JSON.parse(gigsJson) : [];
-    return allGigs.filter((gig: GigData) => gig.sellerName === user?.displayName);
-  };
-
-  // Load gigs when component mounts or user changes
   useEffect(() => {
-    if (user) {
-      setUserGigs(getUserGigs());
-    }
-  }, [user]);
-
-  // Handler for when a gig is deleted
-  const handleGigDeleted = () => {
-    setUserGigs(getUserGigs());
+    toast({
+      title: "Authentication Removed",
+      description: "Authentication functionality has been removed. This is a demo dashboard.",
+    });
+  }, []);
+  
+  // Mock data for a demo user
+  const user = {
+    displayName: "Demo User",
+    photoURL: null
   };
 
-  // Mock data
   const orders = [
     { id: '1', title: 'Logo Design', buyer: 'John D.', price: 50, status: 'In Progress', dueDate: '2023-09-15' },
     { id: '2', title: 'Website Redesign', buyer: 'Sarah M.', price: 250, status: 'Delivered', dueDate: '2023-09-10' },
@@ -167,14 +159,6 @@ const Dashboard = () => {
     }
   ];
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[60vh]">Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/signin" replace />;
-  }
-
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -288,7 +272,7 @@ const Dashboard = () => {
         <TabsContent value="gigs" className="mt-0">
           <UserGigsList 
             gigs={userGigs} 
-            onGigDeleted={handleGigDeleted} 
+            onGigDeleted={() => {}} 
           />
         </TabsContent>
         

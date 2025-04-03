@@ -1,36 +1,33 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Facebook, Apple } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { signInWithGoogle } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign in logic - for now just toast a message
+    // Show a toast message indicating authentication is removed
     toast({
-      title: "Not implemented",
-      description: "Email/password sign in is not yet implemented",
+      title: "Authentication Removed",
+      description: "Authentication functionality has been removed from this project.",
     });
     console.log({ email, password, rememberMe });
   };
 
-  const handleGoogleSignIn = async () => {
-    const result = await signInWithGoogle();
-    if (result.success) {
-      navigate('/');
-    }
+  const handleGoogleSignIn = () => {
+    toast({
+      title: "Authentication Removed",
+      description: "Authentication functionality has been removed from this project.",
+    });
   };
 
   return (

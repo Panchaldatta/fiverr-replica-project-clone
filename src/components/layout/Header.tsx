@@ -35,7 +35,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const isLoggedIn = !!user;
+  const isLoggedIn = false; // Always false since auth is removed
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,13 +53,6 @@ const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
-  };
-
-  const getInitials = () => {
-    if (user?.displayName) {
-      return user.displayName.split(' ').map(name => name[0]).join('').toUpperCase();
-    }
-    return 'U';
   };
 
   return (
@@ -128,52 +121,6 @@ const Header = () => {
                     </Link>
                   </>
                 )}
-                {isLoggedIn && (
-                  <>
-                    <Link to="/messages" className="nav-link hidden lg:flex items-center">
-                      <MessageSquare size={20} />
-                    </Link>
-                    <Link to="/orders" className="nav-link hidden lg:flex items-center">
-                      <ShoppingCart size={20} />
-                    </Link>
-                    <Link to="/favorites" className="nav-link hidden lg:flex items-center">
-                      <Heart size={20} />
-                    </Link>
-                    <Link to="/notifications" className="nav-link hidden lg:flex items-center">
-                      <Bell size={20} />
-                    </Link>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="focus:outline-none">
-                        <Avatar className="h-8 w-8 cursor-pointer">
-                          <AvatarImage src={user?.photoURL || undefined} />
-                          <AvatarFallback className="bg-fiverr-green text-white">
-                            {getInitials()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56" align="end">
-                        <div className="p-2">
-                          <p className="font-medium">{user?.displayName}</p>
-                          <p className="text-xs text-gray-500">{user?.email}</p>
-                        </div>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
-                          Dashboard
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => navigate(`/profile/${user?.displayName?.toLowerCase().replace(/\s+/g, '-')}`)}>
-                          Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => navigate('/settings')}>
-                          Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={handleSignOut}>
-                          Sign Out
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </>
-                )}
               </>
             )}
 
@@ -191,28 +138,6 @@ const Header = () => {
                   Join
                 </Button>
               </Link>
-            )}
-
-            {/* Mobile profile icon */}
-            {isMobile && isLoggedIn && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="focus:outline-none">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.photoURL || undefined} />
-                    <AvatarFallback className="bg-fiverr-green text-white">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={handleSignOut}>
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             )}
           </div>
         </div>
@@ -247,24 +172,7 @@ const Header = () => {
                     <Link to="/join" className="nav-link text-lg font-medium">Join</Link>
                   </div>
                 </>
-              ) : (
-                <div className="flex items-center space-x-3 mb-6">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.photoURL || undefined} />
-                    <AvatarFallback className="bg-fiverr-green text-white">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{user?.displayName}</p>
-                    <p className="text-sm text-fiverr-gray">
-                      <Link to={`/profile/${user?.displayName?.toLowerCase().replace(/\s+/g, '-')}`}>
-                        View Profile
-                      </Link>
-                    </p>
-                  </div>
-                </div>
-              )}
+              ) : null}
 
               <div className="py-4 border-t border-fiverr-border-gray">
                 <h3 className="text-lg font-semibold mb-4">Categories</h3>
@@ -288,15 +196,6 @@ const Header = () => {
                   <li><Link to="/explore" className="text-fiverr-black">Explore</Link></li>
                   <li><Link to="/business" className="text-fiverr-black">Fiverr Business</Link></li>
                   <li><Link to="/become-seller" className="text-fiverr-black">Become a Seller</Link></li>
-                  {isLoggedIn && (
-                    <>
-                      <li><Link to="/orders" className="text-fiverr-black">Orders</Link></li>
-                      <li><Link to="/messages" className="text-fiverr-black">Messages</Link></li>
-                      <li><Link to="/favorites" className="text-fiverr-black">Favorites</Link></li>
-                      <li><Link to="/dashboard" className="text-fiverr-black">Dashboard</Link></li>
-                      <li><button onClick={handleSignOut} className="text-fiverr-black">Sign Out</button></li>
-                    </>
-                  )}
                 </ul>
               </div>
             </div>
