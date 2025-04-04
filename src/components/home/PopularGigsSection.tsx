@@ -14,14 +14,37 @@ const PopularGigsSection = () => {
         setIsLoading(true);
         // Try to fetch gigs from API first
         const response = await gigService.getAllGigs({ sort: '-createdAt', limit: '8' });
+        console.log("API Gigs Response:", response); // Debug log
+        
         if (response && response.data && response.data.length > 0) {
+          console.log("Using API gigs");
           setGigs(response.data);
         } else {
+          console.log("API returned no gigs, falling back to localStorage");
           // Fallback to localStorage if API fails or returns empty
           const localGigs = localStorage.getItem('userGigs');
           if (localGigs) {
             const parsedGigs = JSON.parse(localGigs);
-            setGigs(parsedGigs.slice(0, 8));
+            console.log("Local gigs found:", parsedGigs.length);
+            
+            // Process gigs from localStorage to match the expected format
+            const formattedGigs = parsedGigs.map((gig: any) => ({
+              ...gig,
+              // Ensure each gig has all required properties
+              id: gig.id || `local-${Math.random().toString(36).substr(2, 9)}`,
+              title: gig.title || "Untitled Gig",
+              image: gig.image || "https://via.placeholder.com/300",
+              sellerName: gig.sellerName || "Anonymous",
+              sellerLevel: gig.sellerLevel || "New Seller",
+              sellerImage: gig.sellerImage || "https://via.placeholder.com/50",
+              rating: gig.rating || 0,
+              reviewCount: gig.reviewCount || 0,
+              startingPrice: gig.startingPrice || 5
+            }));
+            
+            setGigs(formattedGigs.slice(0, 8));
+          } else {
+            console.log("No local gigs found");
           }
         }
       } catch (error) {
@@ -30,6 +53,7 @@ const PopularGigsSection = () => {
         const localGigs = localStorage.getItem('userGigs');
         if (localGigs) {
           const parsedGigs = JSON.parse(localGigs);
+          console.log("Using local gigs after error:", parsedGigs.length);
           setGigs(parsedGigs.slice(0, 8));
         }
       } finally {
@@ -39,6 +63,33 @@ const PopularGigsSection = () => {
     
     fetchGigs();
   }, []);
+  
+  // Re-fetch gigs when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log("Local storage changed, refreshing gigs");
+      const localGigs = localStorage.getItem('userGigs');
+      if (localGigs) {
+        const parsedGigs = JSON.parse(localGigs);
+        setGigs(parsedGigs.slice(0, 8));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check when component mounts
+    const localGigs = localStorage.getItem('userGigs');
+    if (localGigs) {
+      const parsedGigs = JSON.parse(localGigs);
+      if (gigs.length === 0 && parsedGigs.length > 0) {
+        setGigs(parsedGigs.slice(0, 8));
+      }
+    }
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [gigs.length]);
   
   if (isLoading) {
     return (

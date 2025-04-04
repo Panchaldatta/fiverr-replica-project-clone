@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const popularSearches = ["Website Design", "WordPress", "Logo Design", "AI Services", "Video Editing"];
 
@@ -36,6 +37,7 @@ const heroBackgrounds = [
 const HeroSection = () => {
   const [currentBackground, setCurrentBackground] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
   
   // Auto rotate through hero backgrounds
   useEffect(() => {
@@ -48,15 +50,19 @@ const HeroSection = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle search functionality here
-    console.log("Searching for:", searchTerm);
-    // Redirect to search results page
+    if (searchTerm.trim()) {
+      // Navigate to search results (implemented as category page for now)
+      // Convert search term to category format
+      const formattedSearch = searchTerm.toLowerCase().replace(/\s+/g, '-');
+      navigate(`/categories/${formattedSearch}`);
+    }
   };
 
   const handlePopularSearch = (term: string) => {
     setSearchTerm(term);
-    // Redirect to search results page
-    console.log("Searching for popular term:", term);
+    // Convert term to category format and navigate
+    const formattedTerm = term.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/categories/${formattedTerm}`);
   };
 
   const background = heroBackgrounds[currentBackground];

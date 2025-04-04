@@ -59,6 +59,9 @@ const CreateGig = () => {
       const userGigs = getUserGigs();
       localStorage.setItem('userGigs', JSON.stringify([...userGigs, newGig]));
       
+      // Trigger storage event for other components to refresh
+      window.dispatchEvent(new StorageEvent('storage'));
+      
       toast({
         title: "Gig Created",
         description: "Your gig has been successfully created!",
@@ -87,6 +90,9 @@ const CreateGig = () => {
       // Save to localStorage
       const userGigs = getUserGigs();
       localStorage.setItem('userGigs', JSON.stringify([...userGigs, newGig]));
+      
+      // Trigger storage event for other components to refresh
+      window.dispatchEvent(new StorageEvent('storage'));
       
       toast({
         title: "Gig Created Locally",
