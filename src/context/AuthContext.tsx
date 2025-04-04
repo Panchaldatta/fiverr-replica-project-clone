@@ -1,12 +1,14 @@
 
-import React, { createContext, useContext, ReactNode, useState } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { authService } from '../services/api';
 
-// Define a mock user object type
+// Define a user object type
 export type MockUser = {
   displayName: string;
   photoURL: string | null;
   uid: string;
   email: string;
+  username?: string;
 };
 
 type AuthContextType = {
@@ -27,27 +29,53 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<MockUser | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock user for demo purposes
-  const mockUser: MockUser = {
-    displayName: 'Demo User',
-    photoURL: 'https://randomuser.me/api/portraits/men/32.jpg',
-    uid: 'demo-user-123',
-    email: 'demo@example.com',
-  };
+  // Check for existing user session
+  useEffect(() => {
+    const checkUserSession = async () => {
+      try {
+        const { user } = await authService.getCurrentUser();
+        
+        if (user) {
+          setUser({
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            uid: user._id,
+            email: user.email,
+            username: user.username,
+          });
+        }
+      } catch (error) {
+        console.error("Error checking user session:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUserSession();
+  }, []);
 
   const handleSignInWithEmail = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log(`Sign in with email: ${email} and password: ${password}`);
+      const result = await authService.login(email, password);
       
-      // This is where you would normally authenticate with a backend service
-      // For demo purposes, let's simulate a successful login with any email/password
-      setUser(mockUser);
+      if (result.success && result.user) {
+        setUser({
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          uid: result.user.id,
+          email: result.user.email,
+          username: result.user.username,
+        });
+        
+        setIsLoading(false);
+        return { success: true };
+      }
       
       setIsLoading(false);
-      return { success: true };
+      return { success: false };
     } catch (error) {
       console.error("Error signing in:", error);
       setIsLoading(false);
@@ -58,23 +86,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleSignUpWithEmail = async (email: string, username: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log(`Sign up with email: ${email}, username: ${username}, and password: ${password}`);
+      const result = await authService.register(email, username, password);
       
-      // This is where you would normally register with a backend service
-      // For demo purposes, let's simulate a successful registration
-      
-      // Create a new user with the provided information
-      const newUser: MockUser = {
-        displayName: username,
-        photoURL: null, // No photo for new users
-        uid: `user-${Date.now()}`, // Generate a unique ID
-        email: email,
-      };
-      
-      setUser(newUser);
+      if (result.success && result.user) {
+        setUser({
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          uid: result.user.id,
+          email: result.user.email,
+          username: result.user.username,
+        });
+        
+        setIsLoading(false);
+        return { success: true };
+      }
       
       setIsLoading(false);
-      return { success: true };
+      return { success: false };
     } catch (error) {
       console.error("Error signing up:", error);
       setIsLoading(false);
@@ -83,9 +111,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleSignOut = async () => {
-    console.log("Sign out clicked");
-    setUser(null);
-    return { success: true };
+    try {
+      const result = await authService.logout();
+      setUser(null);
+      return { success: result.success };
+    } catch (error) {
+      console.error("Error signing out:", error);
+      return { success: false };
+    }
   };
 
   return (
