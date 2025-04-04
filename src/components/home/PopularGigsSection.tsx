@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { GigData, GigCard } from '@/components/gigs/GigCard';
+import GigCard, { GigData } from '@/components/gigs/GigCard';
 import { gigService } from '@/services/api';
 
 const PopularGigsSection = () => {

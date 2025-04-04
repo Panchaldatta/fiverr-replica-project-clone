@@ -37,7 +37,7 @@ const CreateGig = () => {
       // Try to create gig in backend first
       const backendGig = await gigService.createGig({
         ...formData,
-        user: user.id // Make sure user ID is passed to the backend
+        user: user.uid // Changed from user.id to user.uid to match the MockUser type
       });
       
       // If successful, create a new gig with user information
@@ -91,7 +91,7 @@ const CreateGig = () => {
       toast({
         title: "Gig Created Locally",
         description: "Your gig was saved locally. Backend storage failed.",
-        variant: "warning"
+        variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
       });
       
       // Redirect to dashboard
