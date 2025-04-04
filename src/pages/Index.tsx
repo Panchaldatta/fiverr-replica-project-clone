@@ -1,11 +1,11 @@
 
+import { useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularServicesSection from '@/components/home/PopularServicesSection';
 import PopularGigsSection from '@/components/home/PopularGigsSection';
 import BusinessSection from '@/components/home/BusinessSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
-import { useEffect } from 'react';
 
 const Index = () => {
   // Force re-render when localStorage changes (for real-time gig updates)
@@ -18,6 +18,18 @@ const Index = () => {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Initial check for placeholder gigs
+  useEffect(() => {
+    const checkPlaceholderGigs = () => {
+      const gigs = localStorage.getItem('userGigs');
+      if (!gigs || JSON.parse(gigs).length === 0) {
+        console.log("No gigs found on initial load, PopularGigsSection will add placeholders");
+      }
+    };
+    
+    checkPlaceholderGigs();
   }, []);
 
   return (

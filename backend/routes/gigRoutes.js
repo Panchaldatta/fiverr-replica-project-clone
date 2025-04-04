@@ -10,7 +10,13 @@ const {
 } = require('../controllers/gigController');
 const { protect } = require('../middleware/authMiddleware');
 
+// Include review router
+const reviewRouter = require('./reviewRoutes');
+
 const router = express.Router();
+
+// Re-route into review router
+router.use('/:gigId/reviews', reviewRouter);
 
 router.get('/', getGigs);
 router.get('/category/:category', getGigsByCategory);
