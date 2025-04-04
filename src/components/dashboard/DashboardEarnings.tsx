@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useAuth } from '@/context/AuthContext';
 import { userService } from '@/services/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PieChartIcon } from 'lucide-react';
 
 // Define the earnings type
 type EarningsSummary = {
@@ -108,7 +108,7 @@ const DashboardEarnings = () => {
             <div className="text-center text-red-500 my-4">{error}</div>
           ) : chartData.length === 0 ? (
             <div className="text-center flex flex-col justify-center items-center h-full">
-              <PieChart size={80} className="mx-auto text-fiverr-gray" />
+              <PieChartIcon className="h-20 w-20 text-fiverr-gray" />
               <p className="mt-4 text-fiverr-gray">No earnings data to display</p>
             </div>
           ) : (
