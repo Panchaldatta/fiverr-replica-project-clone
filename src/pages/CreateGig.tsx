@@ -6,11 +6,14 @@ import { Navigate } from 'react-router-dom';
 import GigForm, { GigFormData } from '@/components/gigs/GigForm';
 import { v4 as uuidv4 } from 'uuid';
 import { GigData } from '@/components/gigs/GigCard';
+import { gigService } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
-// This would normally save to a backend database
 const CreateGig = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get existing gigs from localStorage or initialize empty array
   const getUserGigs = (): GigData[] => {
@@ -18,28 +21,84 @@ const CreateGig = () => {
     return gigsJson ? JSON.parse(gigsJson) : [];
   };
 
-  const handleSubmit = (formData: GigFormData) => {
-    // Create a new gig with user information
-    const newGig: GigData = {
-      id: uuidv4(),
-      title: formData.title,
-      image: formData.image,
-      sellerName: user?.displayName || 'Anonymous',
-      sellerLevel: 'New Seller',
-      sellerImage: user?.photoURL || 'https://via.placeholder.com/150',
-      rating: 0,
-      reviewCount: 0,
-      startingPrice: formData.startingPrice,
-      description: formData.description,
-      category: formData.category
-    };
+  const handleSubmit = async (formData: GigFormData) => {
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to create a gig.",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    // Save to localStorage
-    const userGigs = getUserGigs();
-    localStorage.setItem('userGigs', JSON.stringify([...userGigs, newGig]));
+    setIsSubmitting(true);
     
-    // Redirect to dashboard
-    navigate('/dashboard');
+    try {
+      // Try to create gig in backend first
+      const backendGig = await gigService.createGig({
+        ...formData,
+        user: user.id // Make sure user ID is passed to the backend
+      });
+      
+      // If successful, create a new gig with user information
+      const newGig: GigData = {
+        id: backendGig.data._id || uuidv4(),
+        title: formData.title,
+        image: formData.image,
+        sellerName: user.displayName || 'Anonymous',
+        sellerLevel: 'New Seller',
+        sellerImage: user.photoURL || 'https://via.placeholder.com/150',
+        rating: 0,
+        reviewCount: 0,
+        startingPrice: formData.startingPrice,
+        description: formData.description,
+        category: formData.category
+      };
+      
+      // Save to localStorage as backup
+      const userGigs = getUserGigs();
+      localStorage.setItem('userGigs', JSON.stringify([...userGigs, newGig]));
+      
+      toast({
+        title: "Gig Created",
+        description: "Your gig has been successfully created!",
+      });
+      
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Error creating gig:", error);
+      
+      // Fallback to localStorage only
+      const newGig: GigData = {
+        id: uuidv4(),
+        title: formData.title,
+        image: formData.image,
+        sellerName: user?.displayName || 'Anonymous',
+        sellerLevel: 'New Seller',
+        sellerImage: user?.photoURL || 'https://via.placeholder.com/150',
+        rating: 0,
+        reviewCount: 0,
+        startingPrice: formData.startingPrice,
+        description: formData.description,
+        category: formData.category
+      };
+      
+      // Save to localStorage
+      const userGigs = getUserGigs();
+      localStorage.setItem('userGigs', JSON.stringify([...userGigs, newGig]));
+      
+      toast({
+        title: "Gig Created Locally",
+        description: "Your gig was saved locally. Backend storage failed.",
+        variant: "warning"
+      });
+      
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {

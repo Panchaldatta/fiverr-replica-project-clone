@@ -26,13 +26,20 @@ app.use(express.json());
 // Enable CORS - Updated to allow requests from any origin
 app.use(cors({
   origin: '*', // Allow all origins
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Basic route for testing
+app.get('/', (req, res) => {
+  res.send('Fiverr Clone API is running...');
+});
 
 // Mount routers
 app.use('/api/auth', authRoutes);
