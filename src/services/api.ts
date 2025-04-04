@@ -1,6 +1,7 @@
 
 import { MockUser } from "@/context/AuthContext";
 
+// Update API_URL to use the correct backend server address with the right port
 const API_URL = "http://localhost:5000/api";
 
 // Helper to handle the API responses
@@ -25,6 +26,8 @@ export const authService = {
   // Register a new user
   async register(email: string, username: string, password: string) {
     try {
+      console.log("Registering user:", { email, username }); // Add debugging
+      
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: {
@@ -39,6 +42,7 @@ export const authService = {
       });
       
       const data = await handleResponse(response);
+      console.log("Registration response:", data); // Add debugging
       
       // Store the token
       if (data.token) {
@@ -55,6 +59,8 @@ export const authService = {
   // Log in a user
   async login(email: string, password: string) {
     try {
+      console.log("Logging in user:", email); // Add debugging
+      
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -67,6 +73,7 @@ export const authService = {
       });
       
       const data = await handleResponse(response);
+      console.log("Login response:", data); // Add debugging
       
       // Store the token
       if (data.token) {

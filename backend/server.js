@@ -23,9 +23,9 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-// Enable CORS
+// Enable CORS - Updated to allow requests from any origin
 app.use(cors({
-  origin: 'http://localhost:8080', // Your frontend URL
+  origin: '*', // Allow all origins
   credentials: true
 }));
 

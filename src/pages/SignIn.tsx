@@ -6,41 +6,41 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { toast } = useToast();
   const { signInWithEmail, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     
     if (!email || !password) {
-      toast({
-        title: "Missing Fields",
-        description: "Please enter both email and password.",
-        variant: "destructive"
-      });
+      setErrorMessage('Please enter both email and password.');
       return;
     }
     
-    const result = await signInWithEmail(email, password);
-    
-    if (result.success) {
-      toast({
-        title: "Sign In Successful",
-        description: "You have been signed in successfully.",
-      });
-      navigate('/');
-    } else {
-      toast({
-        title: "Sign In Failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive"
-      });
+    try {
+      const result = await signInWithEmail(email, password);
+      
+      if (result.success) {
+        toast({
+          title: "Sign In Successful",
+          description: "You have been signed in successfully.",
+        });
+        navigate('/');
+      } else {
+        setErrorMessage('Sign in failed. Please check your credentials and try again.');
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
+      setErrorMessage('Unable to connect to the server. Please check if the backend server is running.');
     }
   };
 
@@ -63,6 +63,13 @@ const SignIn = () => {
               <span className="px-2 bg-white text-fiverr-gray">SIGN IN WITH EMAIL</span>
             </div>
           </div>
+          
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>

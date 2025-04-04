@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react';
 
 const Join = () => {
   const [email, setEmail] = useState('');
@@ -13,57 +14,48 @@ const Join = () => {
   const [username, setUsername] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [marketingEmails, setMarketingEmails] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { toast } = useToast();
   const { signUpWithEmail, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     
     if (!email || !password || !username) {
-      toast({
-        title: "Missing Fields",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
+      setErrorMessage('Please fill in all required fields.');
       return;
     }
     
     if (!agreeTerms) {
-      toast({
-        title: "Terms Agreement Required",
-        description: "You must agree to the Terms of Service to continue.",
-        variant: "destructive"
-      });
+      setErrorMessage('You must agree to the Terms of Service to continue.');
       return;
     }
     
     // Basic password validation
     if (password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive"
-      });
+      setErrorMessage('Password must be at least 8 characters long.');
       return;
     }
     
     console.log({ email, password, username, agreeTerms, marketingEmails });
     
-    const result = await signUpWithEmail(email, username, password);
-    
-    if (result.success) {
-      toast({
-        title: "Account Created",
-        description: "Your account has been created successfully.",
-      });
-      navigate('/');
-    } else {
-      toast({
-        title: "Registration Failed",
-        description: "There was an error creating your account. Please try again.",
-        variant: "destructive"
-      });
+    try {
+      const result = await signUpWithEmail(email, username, password);
+      
+      if (result.success) {
+        toast({
+          title: "Account Created",
+          description: "Your account has been created successfully.",
+        });
+        navigate('/');
+      } else {
+        setErrorMessage('Registration failed. This email or username may already be in use.');
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setErrorMessage('Unable to connect to the server. Please check if the backend server is running.');
     }
   };
 
@@ -86,6 +78,13 @@ const Join = () => {
               <span className="px-2 bg-white text-fiverr-gray">REGISTER WITH EMAIL</span>
             </div>
           </div>
+          
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
